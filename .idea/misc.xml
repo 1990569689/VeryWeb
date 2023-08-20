@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/WenBa/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.3065" />
+        <entry key="..\:/WenBa/app/src/main/res/drawable/ic_apk.xml" value="0.3415" />
+        <entry key="..\:/WenBa/app/src/main/res/drawable/ic_download.xml" value="0.1925" />
+        <entry key="..\:/WenBa/app/src/main/res/drawable/ic_launcher_background.xml" value="0.3065" />
+        <entry key="..\:/WenBa/app/src/main/res/drawable/ic_play.xml" value="0.3495" />
+        <entry key="..\:/WenBa/app/src/main/res/drawable/ic_stop.xml" value="0.3415" />
+        <entry key="..\:/WenBa/app/src/main/res/drawable/icon.xml" value="0.3495" />
+        <entry key="..\:/WenBa/app/src/main/res/drawable/index_ripple.xml" value="0.3055" />
+        <entry key="..\:/WenBa/app/src/main/res/drawable/progress.xml" value="0.3065" />
+        <entry key="..\:/WenBa/app/src/main/res/drawable/radius.xml" value="0.25" />
+        <entry key="..\:/WenBa/app/src/main/res/drawable/ripple_index.xml" value="0.3055" />
+        <entry key="..\:/WenBa/app/src/main/res/drawable/shape.xml" value="0.2985" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/activity_api.xml" value="0.33" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/activity_download.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/activity_index.xml" value="0.30337078651685395" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/activity_main.xml" value="0.33" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/addadblock_dialog.xml" value="0.3333333333333333" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/addbookmark_dialog.xml" value="0.33" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/addfile_dialog.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/api_dialog.xml" value="0.4018058690744921" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/bookmark.xml" value="0.19375" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/bookmark_popup.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/collect.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/collect_item.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/collect_popup.xml" value="0.3333333333333333" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/data_dialog.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/dialog.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/dialog_in_anim.xml" value="0.3333333333333333" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/download_dialog.xml" value="0.3333333333333333" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/download_item.xml" value="0.3333333333333333" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/downloadweb.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/history.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/history_popup.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/index_dialog.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/index_dialog_toast.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/layout.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/li.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/list.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/list_item.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/menu.xml" value="0.3333333333333333" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/menu_dialog.xml" value="0.3333333333333333" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/more_dialog.xml" value="0.3333333333333333" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/more_popup.xml" value="0.3333333333333333" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/popupmenu.xml" value="0.20572916666666666" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/script_item.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/setting.xml" value="0.3333333333333333" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/toast.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/webview_dialog.xml" value="0.3333333333333333" />
+        <entry key="..\:/WenBa/app/src/main/res/layout/webview_popup.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/menu/popupmenu.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/menu/script_list.xml" value="0.34791666666666665" />
+        <entry key="..\:/WenBa/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2985" />
+        <entry key="..\:/WenBa/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.178" />
+        <entry key="..\:/WenBa/app/src/main/res/mipmap-anydpi-v26/icon.xml" value="0.3495" />
+        <entry key="..\:/WenBa/app/src/main/res/xml/file_paths_public.xml" value="0.34791666666666665" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

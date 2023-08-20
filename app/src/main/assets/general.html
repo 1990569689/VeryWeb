@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<head>
+    <style>
+        *{
+            margin: auto 0%;
+            padding: 0;
+        }
+        .text {
+            height: 30px;
+            margin-top: 20px;
+            margin-left: 30px;
+
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+<ul id="list" style="list-style:none;">
+</ul>
+<script>
+        const listArea = document.getElementById('list')
+        // 列表容器
+        const data = "[{\"title\": \"搜索引擎\"},{\"title\": \"主页\"},{\"title\": \"浏览器标识\"},{\"title\": \"网站设定\"},{\"title\": \"大小设置\"},{\"title\": \"下载目录\"},{\"title\": \"下载方式\"},{\"title\": \"导入书签数据\"},{\"title\": \"设置默认浏览器\"}]"
+        json = JSON.parse(data)
+        let listData = json
+        // 列表
+        // 页面加载完成
+        window.onload = () => {
+            listArea && renderList()
+        }
+        // 渲染列表
+        function renderList() {
+            listArea.innerHTML = ''
+            if (listData.length > 0) {
+                listData.forEach((item, index) => {
+                    let LI = document.createElement('li')
+                    LI.setAttribute('key', item.title)
+                    LI.innerHTML = `<div class="text"><p class="b">${item.title}</p></div>`
+                    listArea.appendChild(LI)
+                    LI.onclick = function() {
+                        window.androidObject.call_general(item.title)
+                         }
+                })
+                return
+            }
+        }
+
+    </script>
+</body>
+</html>

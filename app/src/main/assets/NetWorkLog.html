@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<title>
+    网络日志
+</title>
+<link rel="shortcut icon" href="file:///android_asset/icon.png" type="image/x-icon">
+<head>
+    <style>
+        *{
+            margin: auto 0%;
+            padding: 0;
+        }
+     .text {
+            margin-top: 20px;
+            margin-left: 20px;
+
+            width: 100%;
+            margin-right: 20px;
+            height: 50px;
+            background-color: white;
+        }
+        .url{
+            overflow: hidden;
+            text-overflow:ellipsis;
+            white-space: nowrap;
+            font-size: 10px;
+            width:100px;
+        }
+    </style>
+</head>
+
+<body>
+<P>网络Log</P>
+<ul id="list" style="list-style:none;">
+</ul>
+<script>
+        const listArea = document.getElementById('list') // 列表容器
+        //const data = "[{\"title\": \"百度\",\"url\": \"http://baidu.coasdaaaaaaaaaaaadfffffffffdasffffffffffffsdaaaaaaaaaaaaaaaadfsssssssssssfadsm\"},{\"title\": \"谷歌\",\"url\": \"http://google.com\"},{\"title\": \"谷歌\",\"url\": \"http://google.com\"}]"
+        // 页面加载完成
+        window.onload = () => {
+            listArea && renderList()
+        }
+  function showInfoFromJava(msg){
+                alert(msg);
+          }
+        // 渲染列表
+        function renderList(data) {
+          json = JSON.parse(data)
+        let listData = json// 列表
+            listArea.innerHTML = ''
+            if (listData.length > 0) {
+                listData.forEach((item, index) => {
+                    let LI = document.createElement('li')
+                     LI.setAttribute('key', item.type)
+                    LI.setAttribute('key', item.url)
+                    LI.setAttribute('class', item.content ? 'active' : '')
+                    LI.innerHTML =  `<div class="text"><b class="b">${item.type}</b><p class="url">${item.url}</p></div>`
+                    listArea.appendChild(LI)
+                })
+                return
+            }
+
+        }
+    </script>
+</body>
+
+</html>

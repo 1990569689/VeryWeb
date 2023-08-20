@@ -1,0 +1,84 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+
+      <style name="Theme.问吧" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+
+          <item name="windowActionBar">false</item>
+          <item name="android:windowBackground">@drawable/icon</item>
+          <item name="android:windowNoTitle">true</item>
+          <item name="windowNoTitle">true</item>
+          <item name="colorOnSecondary">@color/black</item>
+          <item name="colorControlNormal">@color/pink</item>
+          <item name="colorControlActivated">@color/pink</item>
+
+
+      </style>
+      <!--popMenu的Style-->
+    <style name="popmenuStyle" parent="@android:style/Widget.PopupMenu">
+        <item name="android:popupBackground">#000000</item><!-- popMenu的背景色-->
+    </style>
+    <!--popmenu的字体颜色-->
+    <style name="popmeuText">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <!--popMenu分割线的颜色-->
+    <style name="popmenuDivier">
+        <item name="android:divider">@color/transparent</item>
+        <item name="android:dividerHeight">2sp</item>
+    </style>
+
+    <style name="AppThem">
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+
+        <style name="NobackDialog" parent="@android:style/Theme.Dialog">
+            <!-- 边框 -->
+            <item name="android:windowFrame">@null</item>
+            <!-- 是否浮现在activity之上 -->
+            <item name="android:windowIsFloating">true</item>
+            <!-- 半透明 -->
+            <item name="android:windowIsTranslucent">true</item>
+            <!-- 无标题 -->
+            <item name="android:windowNoTitle">true</item>
+            <item name="android:background">@android:color/transparent</item>
+            <!-- 背景透明 -->
+
+            <!-- 模糊 -->
+            <item name="android:backgroundDimEnabled">true</item>
+            <!-- 遮罩层 -->
+            <item name="android:backgroundDimAmount">0.5</item>
+            <item name="android:windowBackground">@color/transparent</item>
+        </style>
+
+    <style name="MyBottomSheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BottomSheetStyleWrapper</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimAmount">0.1</item>
+        <item name="android:windowIsFloating">false</item>
+
+    </style>
+
+    <style name="BottomSheetStyleWrapper" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="main_menu_animStyle">
+        <item name="android:windowEnterAnimation">@anim/dialog_in_anim</item>
+        <item name="android:windowEnterAnimation">@anim/dialog_close_anim</item>
+    </style>
+
+
+    <style name="Theme.问吧.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+
+</resources>

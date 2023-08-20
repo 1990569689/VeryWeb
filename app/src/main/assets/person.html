@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<head>
+    <style>
+        *{
+            margin: auto 0%;
+            padding: 0;
+        }
+        .text {
+            height: 30px;
+            margin-top: 20px;
+            margin-left: 30px;
+
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+<ul id="list" style="list-style:none;">
+</ul>
+<script>
+        const listArea = document.getElementById('list')
+        // 列表容器
+        const data = "[{\"title\": \"设置背景壁纸\"},{\"title\": \"设置顶部Log\"},{\"title\": \"设置顶部文字\"},{\"title\": \"自定义顶部Css\"}]"
+        json = JSON.parse(data)
+        let listData = json
+        // 列表
+        // 页面加载完成
+        window.onload = () => {
+            listArea && renderList()
+        }
+        // 渲染列表
+        function renderList() {
+            listArea.innerHTML = ''
+            if (listData.length > 0) {
+                listData.forEach((item, index) => {
+                    let LI = document.createElement('li')
+                    LI.setAttribute('key', item.title)
+                    LI.innerHTML = `<div class="text"><p class="b">${item.title}</p></div>`
+                    listArea.appendChild(LI)
+                    LI.onclick = function() {
+                        window.androidObject.call_person(item.title)
+                         }
+                })
+                return
+            }
+        }
+    </script>
+</body>
+</html>

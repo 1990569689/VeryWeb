@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">无尽</string>
+    <string name="download_notification_title">正在下载</string>
+    <string name="download_notification_summary">%d个任务</string>
+    <string name="label_download">下载</string>
+    <string name="label_select_all">全选</string>
+    <string name="label_select_none">取消全选</string>
+    <string name="title_download">下载管理</string>
+    <string name="download_retry">重试</string>
+    <string name="download_pause">暂停</string>
+    <string name="download_resume">继续</string>
+    <string name="download_finish">完成</string>
+    <string name="download_wait">等待</string>
+    <string name="download_unknown">未知大小</string>
+    <string name="install_package">正在安装%s</string>
+    <string name="install_succeeded">安装%s成功</string>
+    <string name="install_failed">安装%s失败</string>
+    <string name="open_failed">未找到打开此类型文件的应用</string>
+    <string name="download_clear">清空</string>
+    <string name="download_delete">删除</string>
+    <string name="download_edit">编辑</string>
+    <string name="download_done">完成</string>
+    <string name="download_clear_task_waring">确认清空所有下载任务?</string>
+    <string name="download_remove_task_waring">确定不再下载此资源?</string>
+    <string name="download_delete_waring">确认删除已下载资源?</string>
+    <string name="download_cancel">取消</string>
+    <string name="download_no_tasks">当前无任务</string>
+    <string name="download_no_resources">当前无资源</string>
+    <string name="download_select_waring">请选择资源</string>
+    <string name="download_title_downloading">下载中</string>
+    <string name="download_title_downloaded">已下载</string>
+    <string name="download_summary">%d个资源</string>
+    <string name="download_date_format">M月d日</string>
+    <string name="download_pause_all">全部暂停</string>
+    <string name="download_start_all">全部开始</string>
+
+</resources>

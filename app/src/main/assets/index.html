@@ -1,0 +1,344 @@
+
+<!DOCTYPE html>
+
+<head>
+    <title>
+        主页
+    </title>
+    <link rel="shortcut icon" href="file:///android_asset/icon.png" type="image/x-icon">
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-image: url("content://storage/emulated/0/DCIM/a.jpg");
+            background-color: rgba(0, 255, 255, 0);
+        }
+        #header{
+            display: inline;
+            height: 40px;
+        }
+        #header-right{
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border-radius:100px;
+            background: rgb(0, 0, 0);
+            color: #ffffff;
+            right: 5px;
+            top: 5px;
+            text-align: center;
+        }
+        .in {
+            margin-left: 20px;
+             outline: none;
+             margin-right: 20px;
+             border-radius: 0px;
+             width: 80%;
+             margin-top: 10px;
+             height: 20px;
+             padding: 5px;
+         }
+
+        .index {
+            height: 140px;
+            background-color: rgba(240, 248, 255, 0);
+
+        }
+        .serach {
+            text-align: center;
+           background-color: rgba(240, 248, 255, 0);
+            margin-top: 160px;
+            height: 80px;
+             margin-left: 40px;
+            margin-right: 40px;
+            position:relative;
+            display: flexbox;
+            justify-content: center;
+            align-items: center;
+        }
+        .imgsearch{
+            width: 30px;
+            height: 30px;
+            vertical-align:middle;
+        }
+        #input {
+            outline: none;
+            background-color: rgba(240, 248, 255, 0);
+            width: 80%;
+            height: 38px;
+            display: inline;
+            border: 0px;
+         }
+          /* 搜索框的动画 */
+           @keyframes search-bar {
+         0% {max-width: 100px;}
+          100% {max-width: 400px;}
+            }
+         .b{
+            display: inline-block;
+            margin-bottom: 10px;
+            font-size: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width:100px;
+        }
+        .url{
+            display:none;
+        }
+        .title{
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 8px;
+            margin-top: 10px;
+            width:60px;
+        }
+
+        ul{
+           margin: 10px;
+           padding: 16px;
+        }
+        ul li{
+            display:inline-block;
+            border-radius:100px;
+            font-size:6px;
+            padding: 4px;
+            text-align: center;
+        }
+        .icon{
+            background-color: #a3a1a1;
+            display: inline-block;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            width: 20px;
+            height: 20px;
+            margin-top: 4px;
+            border-radius: 70px;
+            padding: 12px;
+            font-size: 9px;
+            font-weight: bolder;
+
+        }
+          .icon-top{
+            background-color: #ffffff00;
+            display: inline-block;
+            justify-content: center;
+            align-items: center;
+            width: 65px;
+            height: 65px;
+            margin-top: 3px;
+            border-radius: 70px;
+            padding: 8px;
+            font-size: 10px;
+            font-weight: bolder;
+            text-align: center;
+        }
+        .main{
+           height:90px;
+           line-height: 60px;
+           text-align: center;
+        }
+        #top{
+            font-size: 42px;
+            font-weight: bold;
+        }
+        .top1 {
+            border: 1px solid ;
+            margin: 6px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            /* 背景色 */
+            background-color: rgba(121, 120, 120, 0.1);
+              /* 圆角 */
+            border-radius: 16px;
+            /* 宽度 */
+            padding: 4px;
+                 }
+                 input[type="search"]::-webkit-search-cancel-button{
+                 display: none;
+                 }
+    </style>
+</head>
+
+
+<div class="index">
+    <div class="serach">
+        <div class="main">
+            <h3 id="top"></h3>
+        </div>
+
+        <form class="top1"  target="frameFile" id="search_from" onsubmit="return false;">
+            <input type="search" name="word" id="input" class="input" placeholder="" value=""  baiduSug="1" onmouseover="focus()" @keypress="searchin">
+            <iframe name='frameFile' style="display: none;"></iframe>
+            <div id="svg" onclick="getAndroidValue()" style=" display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" height="1.2em" viewBox="0  0 512 522"  class="svg"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#000000;margin-top:9.6px; margin-right:10px; display:inline-block;position: absolute;}</style><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<ul id="list" style="list-style:none;">
+</ul>
+<script>
+    const listArea = document.getElementById('list')
+    // 列表容器
+    json = JSON.parse(data)
+    let listData = json
+    // 列表
+    // 页面加载完成
+    window.onload = () => {
+        listArea && CollectList()&&setTop(css)
+    }
+    function setTop(msg,data){
+        if(msg=="Logo")
+        {
+            var a = document.getElementById('top')
+            a.innerHTML = '<div class="icon-top"><img src="'+data+'" class="icon-top"> </div>'
+
+        }
+        else if(msg=="自定义Css")
+        {
+            var a = document.getElementById('top')
+             a.innerHTML = data
+        }
+        else if(msg=="文字")
+        {
+            var a = document.getElementById('top')
+            a.innerHTML = ''+data+''
+        }
+        else
+        {
+        }
+     }
+    var getRandomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+    function CollectList(data) {
+     json = JSON.parse(data)
+        let listData = json
+        listArea.innerHTML = ''
+        if (listData.length > 0) {
+            listData.forEach((item, index) => {
+                let LI = document.createElement('li')
+                LI.setAttribute('key', item.title)
+                LI.setAttribute('class', item.content ? 'active' : '')
+                //document.getElementById("show").src =;
+                LI.innerHTML = `<div class="text"><div class="icon"><img src="${ textBecomeImg(item.title,20,"#000")}" id="show"> </div> <p class="url">${item.url}</p><p class="title">${item.title}</p></div>`
+                listArea.appendChild(LI)
+                LI.onclick = function() {
+                    window.androidObject.call_api(item.content)
+                     }
+            })
+            return
+        }
+    }
+
+//var text = "百度哈哈哈";
+/**
+* js使用canvas将文字转换成图像数据base64
+* @param {string}    text              文字内容  "abc"
+* @param {string}    fontsize          文字大小  20
+* @param {function}  fontcolor         文字颜色  "#000"
+* @param {boolean}   imgBase64Data     图像数据
+*/
+function textBecomeImg(text,fontsize,fontcolor){
+    let firsttxt=text.slice(0,1)
+    var canvas = document.createElement('canvas');
+    //小于32字加1  小于60字加2  小于80字加4    小于100字加6
+    $buHeight = 0;
+    if(fontsize <= 32){ $buHeight = 1; }
+    else if(fontsize > 32 && fontsize <= 60 ){ $buHeight = 2;}
+    else if(fontsize > 60 && fontsize <= 80 ){ $buHeight = 4;}
+    else if(fontsize > 80 && fontsize <= 100 ){ $buHeight = 6;}
+    else if(fontsize > 100 ){ $buHeight = 10;}
+    //对于g j 等有时会有遮挡，这里增加一些高度
+    canvas.height=fontsize + $buHeight ;
+    var context = canvas.getContext('2d');
+    // 擦除(0,0)位置大小为200x200的矩形，擦除的意思是把该区域变为透明
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = fontcolor;
+    context.font=fontsize+"px Arial";
+    //top（顶部对齐） hanging（悬挂） middle（中间对齐） bottom（底部对齐） alphabetic是默认值
+    context.textBaseline = 'middle';
+    context.fillText(firsttxt,0,fontsize/2)
+
+    //如果在这里直接设置宽度和高度会造成内容丢失 , 暂时未找到原因 , 可以用以下方案临时解决
+    //canvas.width = context.measureText(text).width;
+    //方案一：可以先复制内容  然后设置宽度 最后再黏贴
+    //方案二：创建新的canvas,把旧的canvas内容黏贴过去
+    //方案三： 上边设置完宽度后，再设置一遍文字
+
+    //方案一： 这个经过测试有问题，字体变大后，显示不全,原因是canvas默认的宽度不够，
+    //如果一开始就给canvas一个很大的宽度的话，这个是可以的。
+    //var imgData = context.getImageData(0,0,canvas.width,canvas.height);  //这里先复制原来的canvas里的内容
+    //canvas.width = context.measureText(text).width;  //然后设置宽和高
+    //context.putImageData(imgData,0,0); //最后黏贴复制的内容
+
+    //方案三：改变大小后，重新设置一次文字
+    canvas.width = context.measureText(firsttxt).width;
+    context.fillStyle = fontcolor;
+    context.font=fontsize+"px Arial";
+    context.textBaseline = 'middle';
+    context.fillText(firsttxt,0,fontsize/2)
+
+    var dataUrl = canvas.toDataURL('image/png');//注意这里背景透明的话，需要使用png
+    return dataUrl;
+}
+
+</script>
+<script type="text/javascript">
+document.getElementById("input").addEventListener("input", function(){
+  if(this.value.length > 0){
+   document.getElementById("svg").style.display = "inline";
+  } else {
+   document.getElementById("svg").style.display = "none";
+  }
+});
+
+function getAndroidValue(){
+var msg=document.getElementById("input").value;
+  if(msg.length>0){
+   document.getElementsByClassName("svg").innerHTML=window.androidObject.androidMethod(msg);
+  }
+  else
+  {
+    document.activeElement.blur();
+  }
+}
+document.getElementById('search_from').onsubmit = function(e){
+   getAndroidValue();
+   document.activeElement.blur();
+}
+
+
+
+</script>
+<script charset="gbk" src="http://www.baidu.com/js/opensug.js"></script>
+<script>
+ document.getElementById("input").focus();
+ var txtObj = document.getElementById("alertSpan");
+ //回调函数，用于获取用户当前选择的文字
+ function show(str){
+ txtObj.innerHTML = str;
+ }
+ var params = {
+ "XOffset": 0,   //提示框位置横向偏移量,单位px
+ "YOffset": 0,   //提示框位置纵向偏移量,单位px
+ "width": 204,   //提示框宽度，单位px
+ "fontColor": "#666",  //提示框文字颜色
+ "fontColorHI": "#222",  //提示框高亮选择时文字颜色
+ "fontSize": "16px",  //文字大小
+ "fontFamily": "微软雅黑", //文字字体
+ "borderColor": "#d8d8d8", //提示框的边框颜色
+ "bgcolorHI": "#e8e8e8",  //提示框高亮选择的颜色
+ "sugSubmit": true,  //在选择提示词条是是否提交表单
+ };
+ BaiduSuggestion.bind("ipt1",params,show);
+</script>
+
+</body>
+</html>

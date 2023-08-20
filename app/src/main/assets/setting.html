@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<head>
+    <style>
+        *{
+            margin: auto 0%;
+            padding: 0;
+        }
+        .text {
+            height: 30px;
+            margin-top: 20px;
+            margin-left: 30px;
+
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+<ul id="list" style="list-style:none;">
+</ul>
+<script>
+        const listArea = document.getElementById('list')
+        // 列表容器  const data = "[{\"title\": \"通用\"},{\"title\": \"高级\"},{\"title\": \"个性化\"},{\"title\": \"广告拦截\"},{\"title\": \"接口管理\"},{\"title\": \"网页脚本\"},{\"title\": \"关于\"}]"
+        const data = "[{\"title\": \"通用\"},{\"title\": \"个性化\"},{\"title\": \"接口管理\"},{\"title\": \"网页脚本\"},{\"title\": \"关于\"}]"
+        json = JSON.parse(data)
+        let listData = json
+        // 列表
+        // 页面加载完成
+        window.onload = () => {
+            listArea && renderList()
+        }
+        // 渲染列表
+        function renderList() {
+            listArea.innerHTML = ''
+            if (listData.length > 0) {
+                listData.forEach((item, index) => {
+                    let LI = document.createElement('li')
+                    LI.setAttribute('key', item.title)
+                    LI.innerHTML = `<div class="text"><p class="b">${item.title}</p></div>`
+                    listArea.appendChild(LI)
+                    LI.onclick = function() {
+                        window.androidObject.call(item.title)
+                         }
+                })
+                return
+            }
+        }
+    </script>
+</body>
+</html>

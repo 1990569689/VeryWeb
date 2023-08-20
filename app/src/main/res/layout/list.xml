@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_weight="1"
+    android:layout_height="50dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:layout_height="50dp">
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="250dp"
+                android:id="@+id/list_title"
+                android:textColor="@color/black"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:lines="1"
+                android:maxEms="1"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:text="@string/app_name"/>
+            <TextView
+                android:layout_width="250dp"
+                android:id="@+id/list_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:lines="1"
+                android:maxEms="1"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@color/black"
+                android:ellipsize="end"
+                android:textSize="10sp"
+                android:text="@string/app_name"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="100dp"
+            android:layout_weight="1"
+            android:layout_marginRight="20dp"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="60dp"
+                android:id="@+id/adblock_user"
+                android:gravity="center"
+                android:textColor="@color/black"
+
+                android:text="●"
+                android:layout_height="50dp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

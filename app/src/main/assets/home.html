@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+
+<head>
+    <title>
+        主页
+    </title>
+    <link rel="shortcut icon" href="file:///android_asset/icon.png" type="image/x-icon">
+    <style type="text/css">
+     //代码
+    </style>
+</head>
+
+<body>
+
+<script type="text/javascript">
+//HTML搜索框调用安卓搜索框代码
+function getAndroidValue(){
+var msg=document.getElementById("input").value;
+ document.getElementsByClassName("img").innerHTML=window.androidObject.androidMethod(msg);
+}
+</script>
+</body>

@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/radius"
+    android:id="@+id/bottom"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
+             <GridLayout
+                 android:columnCount="5"
+                 android:rowCount="3"
+                 android:orientation="vertical"
+                 android:layout_gravity="center"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content">
+                 <LinearLayout
+                     android:layout_weight="1"
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:layout_row="0"
+                     android:layout_column="0"
+                     android:background="@drawable/index_ripple"
+                     android:gravity="center"
+                     android:id="@+id/add_bookmark"
+                     android:layout_height="70dp">
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_bookmark"/>
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textSize="10sp"
+                         android:textColor="@color/black"
+                         android:layout_marginTop="10dp"
+                         android:text="添加书签"/>
+
+                 </LinearLayout>
+
+
+                 <LinearLayout
+                     android:layout_weight="1"
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:id="@+id/bookmark"
+                     android:gravity="center"
+                     android:layout_row="0"
+                     android:background="@drawable/index_ripple"
+                     android:layout_column="1"
+                     android:layout_height="70dp">
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_offline"/>
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textSize="10sp"
+                         android:layout_marginTop="10dp"
+                         android:textColor="@color/black"
+                         android:text="书签"/>
+                 </LinearLayout>
+
+
+                 <LinearLayout
+                     android:layout_weight="1"
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:gravity="center"
+                     android:layout_row="1"
+                     android:layout_column="1"
+                     android:id="@+id/history"
+                     android:background="@drawable/index_ripple"
+                     android:layout_height="70dp">
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_history"/>
+
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:layout_marginTop="10dp"
+                         android:text="历史"
+                         android:textColor="@color/black"
+                         android:textSize="10sp" />
+                 </LinearLayout>
+
+                 <LinearLayout
+                     android:layout_weight="1"
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:id="@+id/downloads"
+                     android:layout_row="2"
+                     android:background="@drawable/index_ripple"
+                     android:layout_column="1"
+                     android:gravity="center"
+                     android:layout_height="70dp">
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_downloads"/>
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textSize="10sp"
+                         android:layout_marginTop="10dp"
+                         android:textColor="@color/black"
+                         android:text="下载"/>
+                 </LinearLayout>
+
+
+                 <LinearLayout
+                     android:layout_weight="1"
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:gravity="center"
+                     android:background="@drawable/index_ripple"
+                     android:layout_row="0"
+                     android:layout_column="2"
+                     android:id="@+id/night"
+                     android:layout_height="70dp">
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_night"/>
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textSize="10sp"
+                         android:layout_marginTop="10dp"
+                         android:textColor="@color/black"
+                         android:text="夜间模式"/>
+                 </LinearLayout>
+
+
+
+
+                 <LinearLayout
+                     android:layout_weight="1"
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:gravity="center"
+                     android:layout_row="1"
+                     android:layout_column="2"
+                     android:id="@+id/source"
+                     android:background="@drawable/index_ripple"
+                     android:layout_height="70dp">
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_view_source"/>
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textSize="10sp"
+                         android:layout_marginTop="10dp"
+                         android:textColor="@color/black"
+                         android:text="源码"/>
+                 </LinearLayout>
+
+                 <LinearLayout
+                     android:layout_weight="1"
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:id="@+id/useragent"
+                     android:gravity="center"
+                     android:layout_row="1"
+                     android:layout_column="3"
+                     android:background="@drawable/index_ripple"
+                     android:layout_height="70dp">
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_useragent"/>
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textSize="10sp"
+                         android:layout_marginTop="10dp"
+                         android:textColor="@color/black"
+                         android:text="模式"/>
+                 </LinearLayout>
+
+                 <LinearLayout
+                     android:layout_weight="1"
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:gravity="center"
+                     android:layout_marginRight="10dp"
+                     android:layout_row="1"
+                     android:layout_column="4"
+                     android:id="@+id/JavaScript"
+                     android:background="@drawable/index_ripple"
+                     android:layout_height="70dp">
+
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_incognito_mode"/>
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textSize="10sp"
+                         android:textColor="@color/black"
+                         android:layout_marginTop="10dp"
+                         android:text="无痕"/>
+
+                 </LinearLayout>
+
+
+                 <LinearLayout
+                     android:layout_weight="1"
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:gravity="center"
+                     android:background="@drawable/index_ripple"
+                     android:id="@+id/person"
+                     android:layout_row="0"
+                     android:layout_column="4"
+                     android:layout_height="70dp">
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_share"/>
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textSize="10sp"
+                         android:layout_marginTop="10dp"
+                         android:textColor="@color/black"
+                         android:text="分享"/>
+                 </LinearLayout>
+
+                 <LinearLayout
+                     android:id="@+id/settings"
+                     android:layout_width="70dp"
+                     android:layout_height="70dp"
+                     android:layout_row="0"
+                     android:layout_column="3"
+                     android:gravity="center"
+                     android:background="@drawable/index_ripple"
+                     android:orientation="vertical">
+
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_settings" />
+
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:layout_marginTop="10dp"
+                         android:text="设置"
+                         android:textColor="@color/black"
+                         android:textSize="10sp" />
+                 </LinearLayout>
+                 <LinearLayout
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:gravity="center"
+                     android:layout_row="1"
+                     android:layout_column="0"
+                     android:background="@drawable/index_ripple"
+                     android:id="@+id/save_web"
+                     android:layout_height="70dp">
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_save"/>
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textSize="10sp"
+                         android:textColor="@color/black"
+                         android:layout_marginTop="10dp"
+                         android:text="保存网页"/>
+
+                 </LinearLayout>
+
+
+                 <LinearLayout
+                     android:id="@+id/resource"
+                     android:layout_width="70dp"
+                     android:layout_height="70dp"
+                     android:layout_row="2"
+                     android:layout_column="0"
+                     android:layout_weight="1"
+                     android:gravity="center"
+                     android:background="@drawable/index_ripple"
+                     android:orientation="vertical">
+
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_resource" />
+
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:layout_marginTop="10dp"
+                         android:textColor="@color/black"
+                         android:text="资源嗅探"
+                         android:textSize="10sp" />
+                 </LinearLayout>
+
+             </GridLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
