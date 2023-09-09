@@ -13,7 +13,7 @@ public class Database extends SQLiteOpenHelper {
     //书签表
     public static final String CREATE_Bookmark = "create table Bookmark(" + "id integer primary key autoincrement," + "title text  key," + "url text)";
     //历史记录表
-    public static final String CREATE_History = "create table History(" + "id integer primary key autoincrement," + "title text  key," + "url text,"+"date text)";
+    public static final String CREATE_History = "create table History(" + "id integer primary key autoincrement," + "title text  key," + "url text,"+"icon text,"+"date text)";
     //手机Ua表
     public static final String CREATE_UserAgent = "create table UserAgent(" + "id integer primary key autoincrement," + "title text  key," + "content text)";
     //手机主页表

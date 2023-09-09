@@ -10,7 +10,7 @@
     app:cardUseCompatPadding="true"
     android:orientation="vertical"
     android:layout_margin="30dp"
-    app:contentPadding="20dp">
+    app:contentPadding="10dp">
     <LinearLayout
         android:layout_width="match_parent"
         android:visibility="gone"
@@ -63,6 +63,7 @@
             android:layout_width="300dp"
             android:textColor="@color/black"
             android:textSize="14sp"
+            android:layout_marginBottom="10dp"
             android:layout_height="match_parent"
             android:text="添加书签"
             />
@@ -115,7 +116,7 @@
                 android:layout_width="match_parent"
                 android:layout_weight="1"
                 android:text="○ 同时添加到主页"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textColor="@color/black"
                 android:id="@+id/add_home"
                 android:lines="1"
@@ -129,6 +130,7 @@
                 android:background="@drawable/index_ripple"
                 android:layout_marginRight="20dp"
                 android:textSize="12sp"
+                android:textColor="@color/black"
                 android:id="@+id/bookmark_cancel"
                 android:text="取消" />
 
@@ -137,6 +139,7 @@
                 android:layout_height="40dp"
                 android:gravity="center"
                 android:textSize="12sp"
+                android:textColor="@color/black"
                 android:background="@drawable/index_ripple"
                 android:id="@+id/bookmark_sure"
                 android:text="确定" />

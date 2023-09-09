@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:background="@color/white"
     android:id="@+id/index"
+    android:scaleType="fitXY"
     android:layout_height="match_parent">
     <RelativeLayout
         android:layout_width="match_parent"
@@ -40,7 +41,7 @@
                     android:scrollbars="none"
                     android:popupBackground="@color/white"
                     android:popupElevation ="0dp"
-                    android:dropDownVerticalOffset="15dp"
+                    android:dropDownVerticalOffset="13dp"
                     android:dropDownHeight="wrap_content"
                     android:completionThreshold="1"
                     android:dropDownHorizontalOffset="5dp"
@@ -286,6 +287,34 @@
 
             </LinearLayout>
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="40dp"
+            android:orientation="vertical"
+            android:visibility="visible"
+            android:id="@+id/resource_view"
+            android:layout_alignParentBottom="true"
+            android:background="@color/white">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:gravity="center_vertical|right"
+                android:visibility="gone"
+                android:layout_height="40dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:layout_marginRight="20dp"
+                    android:text="关闭"/>
+            </LinearLayout>
+            <com.ddonging.wenba.MyListView
+                android:layout_width="match_parent"
+                android:id="@+id/resource_list"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+
 
 
         <FrameLayout
@@ -334,7 +363,11 @@
                 android:visibility="gone"
                 android:layout_marginRight="20dp" />
             </LinearLayout>
-
+      <TextView
+          android:layout_width="match_parent"
+           android:layout_height="0.2dp"
+           android:layout_marginTop="39dp"
+            android:background="#45A6A4A4"/>
           <WebView
               android:layout_marginTop="40dp"
               android:layout_width="match_parent"
@@ -386,7 +419,11 @@
                     android:id="@+id/new_script"
                     android:layout_marginRight="20dp" />
             </LinearLayout>
-
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:layout_marginTop="39dp"
+                android:background="#45A6A4A4"/>
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_marginTop="40dp"
                 android:layout_width="match_parent"
@@ -443,7 +480,10 @@
                     android:id="@+id/more_add"
                     android:layout_marginRight="20dp" />
             </LinearLayout>
-
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:background="#45A6A4A4"/>
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -525,6 +565,11 @@
                         android:layout_height="match_parent"/>
                 </LinearLayout>
             </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:layout_marginTop="39dp"
+                android:background="#45A6A4A4"/>
             <EditText
                 android:layout_marginTop="40dp"
                 android:layout_width="match_parent"
@@ -599,6 +644,10 @@
                     android:visibility="visible"
                     android:layout_height="match_parent"/>
             </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:background="#45A6A4A4"/>
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -649,6 +698,10 @@
                     android:layout_height="20dp"
                     android:layout_marginRight="20dp" />
             </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:background="#45A6A4A4"/>
             <com.ddonging.wenba.MyRecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -784,6 +837,10 @@
             android:id="@+id/add_file"
             android:layout_marginRight="20dp" />
     </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0.2dp"
+        android:background="#45A6A4A4"/>
     <LinearLayout
         android:focusable="true"
         android:focusableInTouchMode="true"
@@ -796,6 +853,7 @@
             android:layout_width="wrap_content"
             android:layout_marginLeft="20dp"
             android:text="书签"
+            android:fontFamily="monospace"
             android:textSize="14sp"
             android:singleLine="true"
             android:textColor="@color/black"
@@ -809,6 +867,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:text="历史"
+            android:fontFamily="monospace"
             android:id="@+id/text_history"
             android:textSize="14sp"
             android:singleLine="true"
@@ -822,6 +881,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:text="纸条"
+            android:fontFamily="monospace"
             android:layout_marginRight="20dp"
             android:id="@+id/text_collect"
             android:textSize="14sp"
@@ -835,6 +895,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:text="离线网页"
+            android:fontFamily="monospace"
             android:layout_marginRight="20dp"
             android:id="@+id/downloadweb"
             android:textSize="14sp"
@@ -850,8 +911,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/white"
-    >
+    android:background="@color/white">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="30dp"
@@ -860,7 +920,7 @@
         android:layout_marginLeft="20dp"
         android:textSize="13sp"
         android:id="@+id/go_back"
-        android:textColor="@color/pink"
+        android:textColor="@color/black"
         android:text="返回上一目录"/>
     <LinearLayout
         android:layout_width="match_parent"
@@ -1013,6 +1073,10 @@
                 android:layout_height="wrap_content"/>
          >
         </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:background="#45A6A4A4"/>
         <com.zhangke.qrcodeview.QRCodeView
             android:id="@+id/qr_code_view"
             android:background="@color/black"
@@ -1063,7 +1127,10 @@
                     android:layout_height="wrap_content"/>
                 >
             </LinearLayout>
-
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:background="#45A6A4A4"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:gravity="center"
@@ -1315,6 +1382,10 @@
             </LinearLayout>
             <TextView
                 android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:background="#45A6A4A4"/>
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="基础设置"
                 android:layout_marginLeft="20dp"
@@ -1430,7 +1501,7 @@
                     android:textColor="@color/black"
                     android:textSize="12sp"
                     android:id="@+id/setting_position_text"
-                    android:text="禁止"/>
+                    android:text="允许"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -1512,6 +1583,10 @@
                     android:layout_height="wrap_content"/>
                 >
             </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:background="#45A6A4A4"/>
           <WebView
               android:layout_width="match_parent"
               android:id="@+id/image_view"
@@ -1552,12 +1627,68 @@
                     android:layout_height="wrap_content"/>
                 >
             </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:background="#45A6A4A4"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:background="@color/white"
+                android:layout_height="match_parent">
             <cn.jzvd.JzvdStd
                 android:id="@+id/video_view"
                 android:layout_width="match_parent"
                 android:layout_height="200dp" />
+            </LinearLayout>
+
         </LinearLayout>
 
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:id="@+id/view_log"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_back"
+                    android:layout_marginLeft="20dp"
+                    />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginLeft="20dp"
+                    android:text="日志查看"
+                    android:textSize="14sp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:visibility="visible"
+                    android:layout_height="wrap_content"/>
+                >
+            </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:background="#45A6A4A4"/>
+           <com.ddonging.wenba.MyListView
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:background="@color/white"
+               android:id="@+id/log_view"/>
+        </LinearLayout>
 
 
 
@@ -1601,6 +1732,11 @@
             </LinearLayout>
             <TextView
                 android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+
+                android:background="#45A6A4A4"/>
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="网页字体大小设置"
                 android:layout_marginLeft="20dp"
@@ -1633,6 +1769,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/size_web"/>
+
 
 
         </LinearLayout>

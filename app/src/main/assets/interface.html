@@ -14,6 +14,10 @@
         }
         .url{
             font-size: 10px;
+            display: none;
+        }
+        .label{
+          font-size: 10px;
         }
     </style>
 </head>
@@ -42,8 +46,11 @@
                      LI.setAttribute('key', item.label)
                     LI.setAttribute('key', item.title)
                     LI.setAttribute('class', item.content ? 'active' : '')
-                    LI.innerHTML =  `<div class="text"><b class="b">${item.title}</b><p class="url">${item.content}</p><p class="url">${item.label}</p></div>`
+                    LI.innerHTML =  `<div class="text"><p class="b">${item.title}</p><p class="url">${item.content}</p><p class="label">类别：${item.label}</p></div>`
                     listArea.appendChild(LI)
+                      LI.onclick = function() {
+                     window.androidObject.api_set(item.title,item.content,item.label)
+                    }
                 })
                 return
             }

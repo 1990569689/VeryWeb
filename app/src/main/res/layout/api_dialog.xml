@@ -24,11 +24,13 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
                 android:textSize="14sp"
+                android:id="@+id/api_title"
+                android:layout_marginBottom="10dp"
                 android:text="添加接口"/>
             <EditText
                 android:layout_width="match_parent"
                 android:hint="标题"
-                android:textSize="10sp"
+                android:textSize="13sp"
                 android:id="@+id/title"
                 android:background="@null"
                 android:layout_height="40dp"/>
@@ -41,7 +43,7 @@
                 android:hint="接口"
                 android:id="@+id/api"
                 android:layout_marginTop="10dp"
-                android:textSize="10sp"
+                android:textSize="13sp"
                 android:background="@null"
                 android:layout_height="40dp"/>
             <TextView
@@ -53,7 +55,7 @@
                 android:hint="标签"
                 android:id="@+id/label"
                 android:layout_marginTop="10dp"
-                android:textSize="10sp"
+                android:textSize="13sp"
                 android:background="@null"
                 android:layout_height="40dp"/>
             <TextView
@@ -63,24 +65,36 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:gravity="right|center_vertical"
-
+                android:layout_marginTop="20dp"
                 android:layout_height="30dp">
-
                 <TextView
                     android:layout_width="50dp"
                     android:text="取消"
+                    android:layout_weight="1"
                     android:textSize="12sp"
                     android:id="@+id/cancel"
+                    android:textColor="@color/black"
+                    android:gravity="left|center"
+                    android:layout_height="30dp"/>
+                <TextView
+                    android:layout_width="50dp"
+                    android:text="删除接口"
+                    android:textSize="12sp"
+                    android:textColor="@color/black"
+                    android:id="@+id/api_delete"
                     android:gravity="center"
+                    android:layout_marginRight="20dp"
                     android:layout_height="30dp"/>
                 <TextView
                     android:layout_width="50dp"
                     android:text="确定"
+                    android:textColor="@color/black"
                     android:textSize="12sp"
                     android:id="@+id/sure"
                     android:gravity="center"
                     android:layout_marginRight="20dp"
                     android:layout_height="30dp"/>
+
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

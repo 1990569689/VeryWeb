@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 
 <head>
@@ -52,8 +53,8 @@
            background-color: rgba(240, 248, 255, 0);
             margin-top: 160px;
             height: 80px;
-             margin-left: 40px;
-            margin-right: 40px;
+             margin-left: 20px;
+            margin-right: 20px;
             position:relative;
             display: flexbox;
             justify-content: center;
@@ -74,8 +75,8 @@
          }
           /* 搜索框的动画 */
            @keyframes search-bar {
-         0% {max-width: 100px;}
-          100% {max-width: 400px;}
+           0% {max-width: 10%;}
+          100% {max-width: 80%;}
             }
          .b{
             display: inline-block;
@@ -89,20 +90,27 @@
         .url{
             display:none;
         }
-        .title{
+         .title{
             overflow: hidden;
-            text-overflow: ellipsis;
             white-space: nowrap;
-            font-size: 8px;
+            font-size: 10px;
+            text-overflow: ellipsis;
             margin-top: 10px;
-            width:60px;
+            width:auto;
+            text-align: center;
         }
 
         ul{
-           margin: 10px;
-           padding: 16px;
+           margin: 20px;
+           padding: 10px;
+           display: grid;
+           grid-template-columns: repeat(5,20%);
+           text-align: center;
+
         }
         ul li{
+            position: relative;
+            align-items: center;
             display:inline-block;
             border-radius:100px;
             font-size:6px;
@@ -155,13 +163,22 @@
             /* 背景色 */
             background-color: rgba(121, 120, 120, 0.1);
               /* 圆角 */
-            border-radius: 16px;
+            border-radius: 30px;
             /* 宽度 */
             padding: 4px;
-                 }
-                 input[type="search"]::-webkit-search-cancel-button{
-                 display: none;
-                 }
+             }
+               #suggest-container{
+                 backdrop-filter: blur(5px);
+                background-color: #585858;
+                text-align: left;
+                margin-left: 10px;
+                margin-right: 10px;
+                 border-radius:  20px;
+                padding: 10px;
+                display: none;
+            }
+
+          input[type="search"]::-webkit-search-cancel-button{display: none; }
     </style>
 </head>
 
@@ -171,27 +188,28 @@
         <div class="main">
             <h3 id="top"></h3>
         </div>
-
-        <form class="top1"  target="frameFile" id="search_from" onsubmit="return false;">
+        <form class="top1"  target="frameFile" id="search_from" >
             <input type="search" name="word" id="input" class="input" placeholder="" value=""  baiduSug="1" onmouseover="focus()" @keypress="searchin">
+
             <iframe name='frameFile' style="display: none;"></iframe>
             <div id="svg" onclick="getAndroidValue()" style=" display: none;">
-                <svg xmlns="http://www.w3.org/2000/svg" height="1.2em" viewBox="0  0 512 522"  class="svg"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#000000;margin-top:9.6px; margin-right:10px; display:inline-block;position: absolute;}</style><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" height="0.8em" viewBox="0  0 512 522"  class="svg"><style>svg{fill:#000000;margin-top:10.6px; margin-right:10px; display:inline-block;position: absolute;}</style><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>
             </div>
-        </form>
 
+        </form>
+        <div id="suggest-container"></div>
     </div>
+
 </div>
 
 <ul id="list" style="list-style:none;">
 </ul>
 <script>
+   const divElement = document.querySelector('.top1');  // 获取 class 为 .box 的 div 元素
+   divElement.style.borderRadius = '30px';  // 设置元素圆角大小为 10px
     const listArea = document.getElementById('list')
-    // 列表容器
     json = JSON.parse(data)
     let listData = json
-    // 列表
-    // 页面加载完成
     window.onload = () => {
         listArea && CollectList()&&setTop(css)
     }
@@ -200,7 +218,6 @@
         {
             var a = document.getElementById('top')
             a.innerHTML = '<div class="icon-top"><img src="'+data+'" class="icon-top"> </div>'
-
         }
         else if(msg=="自定义Css")
         {
@@ -226,8 +243,7 @@
                 let LI = document.createElement('li')
                 LI.setAttribute('key', item.title)
                 LI.setAttribute('class', item.content ? 'active' : '')
-                //document.getElementById("show").src =;
-                LI.innerHTML = `<div class="text"><div class="icon"><img src="${ textBecomeImg(item.title,20,"#000")}" id="show"> </div> <p class="url">${item.url}</p><p class="title">${item.title}</p></div>`
+                LI.innerHTML = `<div class="text"><div class="icon"><img src="${textBecomeImg(item.title,20,"#000")}" id="show"> </div> <p class="url">${item.url}</p><p class="title">${item.title}</p></div>`
                 listArea.appendChild(LI)
                 LI.onclick = function() {
                     window.androidObject.call_api(item.content)
@@ -237,7 +253,6 @@
         }
     }
 
-//var text = "百度哈哈哈";
 /**
 * js使用canvas将文字转换成图像数据base64
 * @param {string}    text              文字内容  "abc"
@@ -294,8 +309,10 @@ function textBecomeImg(text,fontsize,fontcolor){
 document.getElementById("input").addEventListener("input", function(){
   if(this.value.length > 0){
    document.getElementById("svg").style.display = "inline";
+   document.getElementById("suggest-container").style.display = "block";
   } else {
    document.getElementById("svg").style.display = "none";
+    document.getElementById("suggest-container").style.display = "none";
   }
 });
 
@@ -314,31 +331,39 @@ document.getElementById('search_from').onsubmit = function(e){
    document.activeElement.blur();
 }
 
-
-
 </script>
-<script charset="gbk" src="http://www.baidu.com/js/opensug.js"></script>
 <script>
- document.getElementById("input").focus();
- var txtObj = document.getElementById("alertSpan");
- //回调函数，用于获取用户当前选择的文字
- function show(str){
- txtObj.innerHTML = str;
- }
- var params = {
- "XOffset": 0,   //提示框位置横向偏移量,单位px
- "YOffset": 0,   //提示框位置纵向偏移量,单位px
- "width": 204,   //提示框宽度，单位px
- "fontColor": "#666",  //提示框文字颜色
- "fontColorHI": "#222",  //提示框高亮选择时文字颜色
- "fontSize": "16px",  //文字大小
- "fontFamily": "微软雅黑", //文字字体
- "borderColor": "#d8d8d8", //提示框的边框颜色
- "bgcolorHI": "#e8e8e8",  //提示框高亮选择的颜色
- "sugSubmit": true,  //在选择提示词条是是否提交表单
- };
- BaiduSuggestion.bind("ipt1",params,show);
-</script>
+    const searchBox = document.getElementById('input');
+    const suggestContainer = document.getElementById('suggest-container');
+    searchBox.addEventListener('input', () => {
+      suggestContainer.innerHTML = '';
+      const query = searchBox.value;
+      const script = document.createElement('script');
+      script.src = `https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd=${query}&cb=processSuggest`;
+      document.body.appendChild(script);
+    });
+    function processSuggest(data) {
+      const suggestions = data.s;
+      if(suggestions.length==0)
+      {
+       document.getElementById("suggest-container").style.display = "none";
+      }
+      suggestions.forEach((suggestion) => {
+        const suggestionElement = document.createElement('div');
+        suggestionElement.textContent = suggestion;
+        suggestionElement.style.color="#FFFFFF";
+         suggestionElement.style.fontSize="18px";
+         suggestionElement.style.marginTop="10px";
+        // 为每个建议项添加点击事件
+        suggestionElement.addEventListener('click', () => {
+          // 当用户点击建议时，执行搜索操作，这里可以直接跳转到搜索结果页
+          window.androidObject.androidMethod(suggestion);
+          //window.location.href = `https://www.baidu.com/s?wd=${suggestion}`;
+        });
+        suggestContainer.appendChild(suggestionElement);
+      });
+    }
+  </script>
 
 </body>
 </html>

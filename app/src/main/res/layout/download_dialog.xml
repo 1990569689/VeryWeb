@@ -20,6 +20,7 @@
          android:layout_height="match_parent"
          android:textColor="@color/black"
          android:textSize="14sp"
+         android:layout_marginBottom="10dp"
          android:text="你想下载这个文件吗？"
          />
         <EditText

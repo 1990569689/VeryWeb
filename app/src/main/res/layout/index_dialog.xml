@@ -14,8 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="10dp"
-            >
+            android:padding="10dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -125,6 +124,50 @@
                          android:text="下载"/>
                  </LinearLayout>
 
+                 <LinearLayout
+                     android:layout_weight="1"
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:id="@+id/refresh"
+                     android:layout_row="1"
+                     android:background="@drawable/index_ripple"
+                     android:layout_column="2"
+                     android:gravity="center"
+                     android:layout_height="70dp">
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_refresh"/>
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textSize="10sp"
+                         android:layout_marginTop="10dp"
+                         android:textColor="@color/black"
+                         android:text="刷新"/>
+                 </LinearLayout>
+                 <LinearLayout
+                     android:layout_weight="1"
+                     android:layout_width="70dp"
+                     android:orientation="vertical"
+                     android:id="@+id/exit"
+                     android:layout_row="2"
+                     android:background="@drawable/index_ripple"
+                     android:layout_column="3"
+                     android:gravity="center"
+                     android:layout_height="70dp">
+                     <ImageView
+                         android:layout_width="20dp"
+                         android:layout_height="20dp"
+                         android:src="@drawable/ic_exit"/>
+                     <TextView
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textSize="10sp"
+                         android:layout_marginTop="10dp"
+                         android:textColor="@color/black"
+                         android:text="退出"/>
+                 </LinearLayout>
 
                  <LinearLayout
                      android:layout_weight="1"
@@ -139,11 +182,13 @@
                      <ImageView
                          android:layout_width="20dp"
                          android:layout_height="20dp"
+                         android:id="@+id/isnight"
                          android:src="@drawable/ic_night"/>
                      <TextView
                          android:layout_width="wrap_content"
                          android:layout_height="wrap_content"
                          android:textSize="10sp"
+                         android:id="@+id/night_txt"
                          android:layout_marginTop="10dp"
                          android:textColor="@color/black"
                          android:text="夜间模式"/>
@@ -157,7 +202,7 @@
                      android:layout_width="70dp"
                      android:orientation="vertical"
                      android:gravity="center"
-                     android:layout_row="1"
+                     android:layout_row="2"
                      android:layout_column="2"
                      android:id="@+id/source"
                      android:background="@drawable/index_ripple"
@@ -213,6 +258,7 @@
                      <ImageView
                          android:layout_width="20dp"
                          android:layout_height="20dp"
+                         android:id="@+id/trace"
                          android:src="@drawable/ic_incognito_mode"/>
                      <TextView
                          android:layout_width="wrap_content"
@@ -220,6 +266,7 @@
                          android:textSize="10sp"
                          android:textColor="@color/black"
                          android:layout_marginTop="10dp"
+                         android:id="@+id/trace_txt"
                          android:text="无痕"/>
 
                  </LinearLayout>

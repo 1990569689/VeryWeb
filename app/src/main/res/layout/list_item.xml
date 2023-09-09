@@ -13,6 +13,7 @@
         android:layout_marginLeft="20dp"
         android:id="@+id/webicon"
         android:src="@drawable/ic_webicon"/>
+
     <LinearLayout
         android:layout_height="wrap_content"
         android:layout_width="match_parent"

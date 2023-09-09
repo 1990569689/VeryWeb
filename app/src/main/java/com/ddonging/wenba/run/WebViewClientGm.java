@@ -20,7 +20,6 @@ import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.Log;
 import android.webkit.WebResourceRequest;
@@ -293,16 +292,11 @@ public class WebViewClientGm extends WebViewClient {
 		db.close();
 	}
 
-	@Override
-	public void onPageStarted(WebView view, String url, Bitmap favicon) {
-		//runMatchingScripts(view, url, true, null, null);
-	}
 
 
 	@Override
 	public void onPageFinished(WebView view, String url) {
 		runMatchingScripts(view, url, true, null, null);
-
 	}
 
 	/**

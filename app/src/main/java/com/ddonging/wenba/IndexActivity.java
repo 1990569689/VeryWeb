@@ -22,12 +22,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -45,6 +47,7 @@ import android.provider.Settings;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -68,9 +71,8 @@ import android.webkit.MimeTypeMap;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
-import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceError;
+import android.webkit.WebIconDatabase;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -106,7 +108,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.ddonging.wenba.download.DefaultNotifier;
 import com.ddonging.wenba.download.DownloadInfo;
 import com.ddonging.wenba.download.DownloadJobListener;
 import com.ddonging.wenba.download.DownloadManager;
@@ -141,8 +142,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -158,9 +157,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Stack;
 import java.util.TimeZone;
 
+import cn.jzvd.JzvdStd;
 import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
 
 
@@ -186,8 +185,8 @@ public class IndexActivity extends FragmentActivity {
     static List<String>[] WebPageTitle = new ArrayList[200];
     static List<Bitmap>[] WebPageIcon = new ArrayList[200];
     static int xDown, yDown;
-    private final Stack<String> mUrls = new Stack<>();
     private final ArrayList array = new ArrayList();
+    private final ArrayList array_collect = new ArrayList();
     private final List<String> FilePath = new ArrayList<>();
     public FrameLayout frameLayout, frame, webviewgm, framewebview, script, edit_script; //声明View   容器
     public List<String> urlall;
@@ -202,14 +201,12 @@ public class IndexActivity extends FragmentActivity {
     ImageView goBack, goForward, Home, More, find, add, table_add, add_file, more_add, api, pscode, new_script, adblock_add, search;
     ImageView back_setting, back_script, back_more, back_editor, back_download, back_downloaded, back_bookmark, back_code, back_about, back_websetting, back_sizesetting;
     LinearLayout about, about_updata, about_git, about_addtg, about_qun, open, about_agree, about_donation, about_share, about_back, top;
-    LinearLayout view_image, in_to_view, save_web, toast_view, SizeSettings, video_view, person, night, source, javascript, set, full, add_bookmark, bookmark, viewlist, history, downloads, downloaded, downloadsList, more, adblock, WebConfig, resource, QR, useragent, webSettings, setting_img, setting_javascript, setting_cookies, setting_apk, setting_position, setting_mic, setting_camera;
+    LinearLayout view_image, view_log,in_to_view, save_web,exit,refresh, toast_view, SizeSettings,view_video, person, night, source, javascript, set, full, add_bookmark, bookmark, viewlist, history, downloads, downloaded, downloadsList, more, adblock, WebConfig, resource, QR, useragent, webSettings, setting_img, setting_javascript, setting_cookies, setting_apk, setting_position, setting_mic, setting_camera;
     static AutoCompleteTextView webtitle;
-    WebBackForwardList weblist;
+    JzvdStd video_view;
     static String WebTitle;
     String apiTitle;
     String url;
-    String starturl;
-    String lasturl;
     ScriptStore scriptStore;
     WebProgress ps;
     TextView edit_name, in_to, in_to_cancel, downloads_ok, goto_desktop, save_pdf, size_progress, toast_sure, toast_cancel, toast_content, title, settitle, text_bookmark, text_collect, text_history, script_save, go_back, config_log, config_tool, config_cookie, webdownload, downloadweb, setting_img_text, setting_javascript_text, setting_cookies_text, setting_apk_text, setting_position_text, setting_mic_text, setting_camera_text;
@@ -225,7 +222,7 @@ public class IndexActivity extends FragmentActivity {
     List<Bitmap> List = new ArrayList<>();
     boolean isOn;
     ListView settinglist3, adblock_list;
-    MyListView settinglist, settinglist2,settinglist4;
+    MyListView settinglist, settinglist2,settinglist4,resource_list,log_view;
     boolean if_exsit;
     EditText script_edit;
     static MyRecyclerView downloaded_recyclerview;
@@ -238,8 +235,8 @@ public class IndexActivity extends FragmentActivity {
     Map<Integer, List<String>> WebPageTitleAll = new HashMap<Integer, List<String>>();
     Map<Integer, List<Bitmap>> WebPageIconAll = new HashMap<Integer, List<Bitmap>>();
     ArrayList<Integer> listviewAll = new ArrayList<Integer>();
-    static Bitmap bitmap;
-    boolean isEditMode = false;
+    public static Bitmap bitmap;
+    boolean isEditMode = false,OnFocus;
     DownloadedAdapter Downadapter;
     FileManager fileManager;
     static DownloadedAdapter DownloadedAdapter;
@@ -256,6 +253,9 @@ public class IndexActivity extends FragmentActivity {
     private ValueCallback<Uri[]> mFilePathCallback;
     private static DownloadAdapter DownloadAdapter;
     private List<DownloadInfo> downloadss;
+    static SimpleAdapter mySimpleAdapter, mSimpleAdapter;
+    static final ArrayList<HashMap<String, Object>> listItem = new ArrayList<HashMap<String, Object>>();/*在数组中存放数据*/
+
     private final DownloadJobListener jobListener = new DownloadJobListener() {
         @Override
         public void onCreated(DownloadInfo info) {
@@ -276,18 +276,6 @@ public class IndexActivity extends FragmentActivity {
         }
     };
     private DownloadManager managerr;
-
-    /*
-     @Override
-    public Resources getResources() {
-         Resources resources=super.getResources();
-         Configuration configuration=new Configuration();
-         configuration.setToDefaults();
-         resources. updateConfiguration(configuration,resources.getDisplayMetrics());
-        return resources;
-    }
-
-     */
 
     public static void setWindowStatusBarColor(Activity activity, int var1) {
         try {
@@ -316,6 +304,24 @@ public class IndexActivity extends FragmentActivity {
         return var2;
     }
 
+    public boolean checkDeviceHasNavigationBar(Context context) {
+        WindowManager manager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+        Display defaultDisplay = manager.getDefaultDisplay();
+        //屏幕实际高度
+        Point realPoint = new Point();
+        defaultDisplay.getRealSize(realPoint);
+        //屏幕显示高度
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        defaultDisplay.getMetrics(outMetrics);
+        //虚拟底部导航高度
+        int navigationBarHeight = getNavBarHeight(context);
+        if ((outMetrics.heightPixels + navigationBarHeight) <= realPoint.y){
+            //如果显示高度+底部导航栏高度 <= 屏幕真实高度， 说明显示虚拟底部导航栏，反之则不显示
+            return true;
+        }
+        return false;
+
+    }
     private static int getStatusBarHeight(Activity activity) {
         // 获得状态栏高度
         int resourceId = activity.getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -324,12 +330,15 @@ public class IndexActivity extends FragmentActivity {
 
     public static int getNavBarHeight(Context context) {
         int result = 0;
-        int resourceId = context.getResources().getIdentifier("navigation_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = context.getResources().getDimensionPixelSize(resourceId);
-        }
+            Resources res = context.getResources();
+            int resourceId = res.getIdentifier("navigation_bar_height", "dimen", "android");
+            if (resourceId > 0) {
+                result = res.getDimensionPixelSize(resourceId);
+            }
+
         return result;
     }
+
 
     /**
      * 关闭软键盘
@@ -354,8 +363,6 @@ public class IndexActivity extends FragmentActivity {
             DownloadManager controller = DownloadManager.getInstance();
             tasks.add(controller.newTask(i, url, "("+i+")无尽："+filename).extras("http://").create());
             DownloadAdapter.notifyDataSetChanged();
-            DefaultNotifier notifier=new DefaultNotifier(context);
-            notifier.notify(controller.getAllInfo());
             for (DownloadTask task : tasks) {
                 task.start();
             }
@@ -578,7 +585,6 @@ public class IndexActivity extends FragmentActivity {
         if (Homepage.equals("本地主页：主页")) {
             addView(ListViews, "file:///android_asset/index.html", 0, null);
         } else if (Homepage.startsWith("本地主页：")) {
-
             if (db.isOpen()) {
                 Cursor cursorr = db.rawQuery("SELECT content FROM Homepage WHERE title='" + Homepage + "'", null);
                 if (cursorr.getCount() > 0) {
@@ -607,6 +613,11 @@ public class IndexActivity extends FragmentActivity {
     public void destory()
     {
         for (int i = WebPageAll.get(countlist.get(count)).size() - 1; i > itempager[countlist.get(count)].getCurrentItem(); i--) {
+            itemlistViewAll.get(countlist.get(count)).get(i).setWebViewClient(null);
+            itemlistViewAll.get(countlist.get(count)).get(i).setWebChromeClient(null);
+            itemlistViewAll.get(countlist.get(count)).get(i).loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
+            itemlistViewAll.get(countlist.get(count)).get(i).clearHistory();
+            ((ViewGroup)  itemlistViewAll.get(countlist.get(count)).get(i).getParent()).removeView( itemlistViewAll.get(countlist.get(count)).get(i));
             itemlistViewAll.get(countlist.get(count)).get(i).destroy();
             viewPagerAdapter[countlist.get(count)].destroyItem(itempager[countlist.get(count)], i, "");
             WebPageAll.get(countlist.get(count)).remove(i);
@@ -640,6 +651,12 @@ public class IndexActivity extends FragmentActivity {
         list.add("搜索");
         itemlistViewAll.get(countlist.get(count)).get(listview).setActionList(list);
         itemlistViewAll.get(countlist.get(count)).get(listview).linkJSInterface();
+        itemlistViewAll.get(countlist.get(count)).get(listview).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return true;
+            }
+        });
         itemlistViewAll.get(countlist.get(count)).get(listview).setActionSelectListener(new ActionSelectListener() {
             @Override
             public void onClick(String title, String selectText) {
@@ -653,7 +670,7 @@ public class IndexActivity extends FragmentActivity {
                         SQLiteOpenHelper dbHelper = new Database(IndexActivity.this, "Database", null, 1);
                         SQLiteDatabase db = dbHelper.getWritableDatabase();
                         if (db.isOpen()) {
-                            String sql = "insert into Card(title,content) values(\"" + "[" + webtitle.getText().toString() + "]\n" + selectText + "\",\"" + url + "\")";
+                            String sql = "insert into Card(title,content) values(\"" + selectText + "\",\"" + url + "\")";
                             db.execSQL(sql);
                         }
                         ToastUtil.Toast(IndexActivity.this, "添加成功");
@@ -950,13 +967,11 @@ public class IndexActivity extends FragmentActivity {
                 lp.width = display.getWidth() - 150; // 设置宽度
                 dialog.getWindow().setAttributes(lp);
                 dialog.getWindow().setContentView(view);
-
                 TextView data_title = view.findViewById(R.id.data_title);
                 TextView data_content = view.findViewById(R.id.data_content);
                 data_content.setText("来自:" + url + "的消息\n" + message);
                 TextView data_sure = view.findViewById(R.id.data_sure);
                 TextView data_cancel = view.findViewById(R.id.data_cancel);
-
                 data_sure.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -1043,7 +1058,6 @@ public class IndexActivity extends FragmentActivity {
                 table_text.setText(String.valueOf(final_count + 1));
                 adapter.notifyItemInserted(list.size());
                 listviewAll.add(listview);
-                //initWeb();
                 listview = 0;
                 touch=false;
                 isWindow = true;
@@ -1094,7 +1108,6 @@ public class IndexActivity extends FragmentActivity {
                                 }
                             }
                         }
-
                     }
                     if(!isOn)
                     {
@@ -1108,55 +1121,19 @@ public class IndexActivity extends FragmentActivity {
                     }
                 }
             }
-
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 // TODO 自动生成的方法存根
                 ps.setColor("#E93D3D", "#EDA2A2");
                 ps.setWebProgress(newProgress);//设置进度值
-                find.setImageResource(R.drawable.ic_go);
-                if (newProgress == 10) {
-                    itemlistViewAll.get(countlist.get(count)).get(listview).setBackgroundColor(Color.WHITE);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (isNight) {
-                                getWindow().setNavigationBarColor(getResources().getColor(R.color.night));
-                                getWindow().setStatusBarColor(getResources().getColor(R.color.night));
-                                bottomView.setBackgroundColor(getResources().getColor(R.color.night));
-                                main.setBackgroundColor(getResources().getColor(R.color.night));
-                                goBack.setColorFilter(getResources().getColor(R.color.white));
-                                goForward.setColorFilter(getResources().getColor(R.color.white));
-                                Home.setColorFilter(getResources().getColor(R.color.white));
-                                More.setColorFilter(getResources().getColor(R.color.white));
-                                add.setColorFilter(getResources().getColor(R.color.white));
-                                search.setColorFilter(getResources().getColor(R.color.white));
-                                find.setColorFilter(getResources().getColor(R.color.white));
-                                api.setColorFilter(getResources().getColor(R.color.white));
-                                webtitle.setTextColor(getResources().getColor(R.color.white));
-                                table_text.setTextColor(getResources().getColor(R.color.white));
-                            } else {
-                                getWindow().setNavigationBarColor(Color.WHITE);
-                                getWindow().setStatusBarColor(Color.WHITE);
-                                mWebView[count].setBackgroundColor(Color.WHITE);
-                                bottomView.setBackgroundColor(Color.WHITE);
-                                main.setBackgroundColor(Color.WHITE);
-                                goBack.setColorFilter(getResources().getColor(R.color.black));
-                                goForward.setColorFilter(getResources().getColor(R.color.black));
-                                Home.setColorFilter(getResources().getColor(R.color.black));
-                                More.setColorFilter(getResources().getColor(R.color.black));
-                                add.setColorFilter(getResources().getColor(R.color.black));
-                                search.setColorFilter(getResources().getColor(R.color.black));
-                                find.setColorFilter(getResources().getColor(R.color.black));
-                                api.setColorFilter(getResources().getColor(R.color.black));
-                                webtitle.setTextColor(getResources().getColor(R.color.black));
-                                table_text.setTextColor(getResources().getColor(R.color.black));
-                                pscode.setColorFilter(getResources().getColor(R.color.black));
-                            }
-                        }
-                    });
-
+                if(OnFocus)
+                {
+                    find.setImageResource(R.drawable.ic_go);
+                }else
+                {
+                    find.setImageResource(R.drawable.ic_close);
                 }
+
                 if (newProgress == 100 && !isOn) {
                     view.getSettings().setBlockNetworkImage(false);
                     find.setImageResource(R.drawable.ic_refresh);
@@ -1164,11 +1141,18 @@ public class IndexActivity extends FragmentActivity {
                     initView();
                 }
                 progress = newProgress;
+
             }
 
             @Override
             public void onReceivedIcon(WebView view, Bitmap icon) {
                 super.onReceivedIcon(view, icon);
+                bitmap = icon;
+                SQLiteOpenHelper dbHelper = new Database(IndexActivity.this, "Database", null, 1);
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                String sql = "update  History set icon=\"" +Util.bitmapToBase64(bitmap)+"\""+"where url=\""+view.getUrl()+"\"";
+                db.execSQL(sql);
+
                 if (listview > 0) {
                     for (Map.Entry<Integer, List<WebViewGm>> all : itemlistViewAll.entrySet()) {
                         if (all.getValue().contains(view)) {
@@ -1178,7 +1162,7 @@ public class IndexActivity extends FragmentActivity {
                                 } else {
                                     WebPageIcon[i].set(listview, icon);
                                     WebPageIconAll.put(i, WebPageIcon[i]);
-                                    bitmap = icon;
+
                                 }
                             } catch (Exception e) {
                             }
@@ -1219,11 +1203,8 @@ public class IndexActivity extends FragmentActivity {
         WebPageAll.put(countlist.get(count), WebPageList[countlist.get(count)]);
         WebPageIcon[countlist.get(count)].add(Util.drawableToBitamp(getDrawable(R.drawable.ic_home)));
         WebPageIconAll.put(countlist.get(count), WebPageIcon[countlist.get(count)]);
-
         WebPageTitleAll.put(countlist.get(count), WebPageTitle[countlist.get(count)]);
-
         mWebView[count].setScriptStore(scriptStore);
-
         mWebView[count].setDownloadListener(new ScriptBrowserDownloadListener(this));
         mWebView[count].setWebViewClient(new ScriptBrowserWebViewClientGm(scriptStore, mWebView[count].getWebViewClient().getJsBridgeName(), mWebView[count].getWebViewClient().getSecret(), this));
         mWebView[count].setWebChromeClient(new WebChromeClient() {
@@ -1238,10 +1219,6 @@ public class IndexActivity extends FragmentActivity {
                 }
 
             }
-
-            /**
-             * Return value usage see FILE_CHOOSE_REQUEST in
-             */
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, WebChromeClient.FileChooserParams fileChooserParams) {
                 mFilePathCallback = filePathCallback;
@@ -1313,6 +1290,7 @@ public class IndexActivity extends FragmentActivity {
                     find.setImageResource(R.drawable.ic_refresh);
                     search.setImageResource(R.drawable.ic_suo);
                     initView();
+
                 }
                 progress = newProgress;
             }
@@ -1331,7 +1309,6 @@ public class IndexActivity extends FragmentActivity {
                     } else {
                         WebPageIcon[i].set(listview, icon);
                         WebPageIconAll.put(i, WebPageIcon[i]);
-                        bitmap = icon;
                     }
                 } catch (Exception e) {
                 }
@@ -1447,6 +1424,7 @@ public class IndexActivity extends FragmentActivity {
         SQLiteOpenHelper dbHelper = new Database(IndexActivity.this, "Database", null, 1);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         if (is) {
+            view.setBackgroundColor(Color.WHITE);
             view.getSettings().setBlockNetworkImage(false);
             view.getSettings().setLoadsImagesAutomatically(Webimg);
             view.getSettings().setUseWideViewPort(true);
@@ -1476,11 +1454,14 @@ public class IndexActivity extends FragmentActivity {
                 Cursor cursorr = db.rawQuery("SELECT content FROM UserAgent WHERE title='" + UserAgent + "'", null);
                 if (cursorr.getCount() > 0) {
                     while (cursorr.moveToNext()) {
-                        String ua = cursorr.getString(cursorr.getColumnIndex("content"));
+                        @SuppressLint("Range") String ua = cursorr.getString(cursorr.getColumnIndex("content"));
                         view.getSettings().setUserAgentString(ua);
                     }
                 }
             }
+        }else
+        {
+            view.setBackgroundColor(0);
         }
         view.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);  //设置 缓存模式/
         view.getSettings().setDomStorageEnabled(true);
@@ -1493,14 +1474,14 @@ public class IndexActivity extends FragmentActivity {
         view.getSettings().setAllowFileAccess(true);
         view.getSettings().setAppCachePath(cacheDirPath);
         view.getSettings().setAppCacheEnabled(true);
-        view.setBackgroundColor(0);
         view.addJavascriptInterface(IndexActivity.this, "androidObject");
         view.getSettings().setDomStorageEnabled(true);
         view.getSettings().setNeedInitialFocus(true);
         view.getSettings().setDefaultTextEncodingName("utf-8");//设置编码格式
         view.getSettings().setDefaultFontSize(WebFontSize);
         view.getSettings().setMinimumFontSize(10);//设置WebView支持的最小字体大小，默认为
-        view.getSettings().setGeolocationEnabled(true);
+        Boolean position = getSharedPreferences("data", MODE_PRIVATE).getBoolean("setting_position", true);
+        view.getSettings().setGeolocationEnabled(position);
         view.getSettings().setSupportMultipleWindows(true);
         view.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         view.getSettings().setAllowUniversalAccessFromFileURLs(true);
@@ -1589,6 +1570,34 @@ public class IndexActivity extends FragmentActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
+                case 1:
+                    if (data != null) {
+                        FileUtil file = new FileUtil();
+                        String realPathFromUri = FileUtil.getRealPathFromUriAboveApi19(IndexActivity.this, data.getData());
+                        Boolean img = getSharedPreferences("data", MODE_PRIVATE).edit().putString("indexBackground", realPathFromUri).commit();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                index.setBackground(Drawable.createFromPath(realPathFromUri));
+                                goBack.setColorFilter(getResources().getColor(R.color.white));
+                                goForward.setColorFilter(getResources().getColor(R.color.white));
+                                Home.setColorFilter(getResources().getColor(R.color.white));
+                                More.setColorFilter(getResources().getColor(R.color.white));
+                                add.setColorFilter(getResources().getColor(R.color.white));
+                                search.setColorFilter(getResources().getColor(R.color.white));
+                                find.setColorFilter(getResources().getColor(R.color.white));
+                                api.setColorFilter(getResources().getColor(R.color.white));
+                                webtitle.setTextColor(getResources().getColor(R.color.white));
+                                table_text.setTextColor(getResources().getColor(R.color.white));
+                                pscode.setColorFilter(getResources().getColor(R.color.white));
+
+                            }
+                        });
+                    } else {
+                        ToastUtil toast = new ToastUtil();
+                        ToastUtil.Toast(IndexActivity.this, "选择失败，请重新选择");
+                    }
+                    break;
                 case 6:
                     if (resultCode == RESULT_OK) {
                         Uri uri = data.getData();
@@ -1643,39 +1652,11 @@ public class IndexActivity extends FragmentActivity {
                     ToastUtil.Toast(IndexActivity.this, "权限获取成功，再次点击安装即可");
                     break;
                 case 11:
-                    ToastUtil.Toast(IndexActivity.this, "");
+                    ToastUtil.Toast(IndexActivity.this, data.getData().toString());
                     break;
             }
-            switch (requestCode) {
-                case 1:
-                    if (data != null) {
-                        FileUtil file = new FileUtil();
-                        String realPathFromUri = FileUtil.getRealPathFromUriAboveApi19(IndexActivity.this, data.getData());
-                        Boolean img = getSharedPreferences("data", MODE_PRIVATE).edit().putString("indexBackground", realPathFromUri).commit();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                index.setBackground(Drawable.createFromPath(realPathFromUri));
-                                goBack.setColorFilter(getResources().getColor(R.color.white));
-                                goForward.setColorFilter(getResources().getColor(R.color.white));
-                                Home.setColorFilter(getResources().getColor(R.color.white));
-                                More.setColorFilter(getResources().getColor(R.color.white));
-                                add.setColorFilter(getResources().getColor(R.color.white));
-                                search.setColorFilter(getResources().getColor(R.color.white));
-                                find.setColorFilter(getResources().getColor(R.color.white));
-                                api.setColorFilter(getResources().getColor(R.color.white));
-                                webtitle.setTextColor(getResources().getColor(R.color.white));
-                                table_text.setTextColor(getResources().getColor(R.color.white));
-                                pscode.setColorFilter(getResources().getColor(R.color.white));
 
-                            }
-                        });
-                    } else {
-                        ToastUtil toast = new ToastUtil();
-                        ToastUtil.Toast(IndexActivity.this, "选择失败，请重新选择");
-                    }
-                    break;
-            }
+
         }
     }
 
@@ -1800,7 +1781,6 @@ public class IndexActivity extends FragmentActivity {
                     @Override
                     public void onClick(View view) {
                         bookmark_list.setText(bookmarkpath.substring(bookmarkpath.lastIndexOf("bookmark")));
-
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -1856,7 +1836,6 @@ public class IndexActivity extends FragmentActivity {
 
             }
         });
-
         bookmark_sure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1909,7 +1888,7 @@ public class IndexActivity extends FragmentActivity {
         WindowManager windowManager = getWindowManager();
         Display display = windowManager.getDefaultDisplay();
         WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
-        lp.width = display.getWidth() - 130; // 设置宽度
+        lp.width = display.getWidth() - 120; // 设置宽度
         dialog.getWindow().setAttributes(lp);
         dialog.getWindow().setContentView(view);
 
@@ -1982,8 +1961,7 @@ public class IndexActivity extends FragmentActivity {
         more_sure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (more_title.getText().toString() == "" || more_content.getText().toString() == "") {
+                if (more_title.getText().toString().equals("") || more_content.getText().toString().equals("")) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -2049,7 +2027,6 @@ public class IndexActivity extends FragmentActivity {
                     if (db.isOpen()) {
                         Cursor cursorr = db.rawQuery("SELECT title FROM Engines WHERE title='" + more_name.getText().toString() + "'", null);
                         if (cursorr.getCount() > 0) {
-
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -2058,9 +2035,13 @@ public class IndexActivity extends FragmentActivity {
                                 }
                             });
                         } else {
-                            String sql = "insert into Engines(title,content) values(\"" + more_name.getText().toString() + "\",\"" + more_content.getText().toString() + "\")";
-                            db.execSQL(sql);
-
+                            try{
+                                String sql = "insert into Engines(title,content) values(\"" + more_name.getText().toString() + "\",\"" + more_content.getText().toString() + "\")";
+                                db.execSQL(sql);
+                            }catch (Exception e)
+                            {
+                                ToastUtil.Toast(IndexActivity.this,"添加失败："+e);
+                            }
                             ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
                             //Cursor cursor = db.rawQuery("select * from bookmarkDB", null);
                             //查询语句也可以这样写
@@ -2119,7 +2100,6 @@ public class IndexActivity extends FragmentActivity {
         more_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 dialog.cancel();
             }
         });
@@ -2159,14 +2139,12 @@ public class IndexActivity extends FragmentActivity {
                     getSharedPreferences("DIY", MODE_PRIVATE).edit().putString("content", more_content.getText().toString()).commit();
                     getSharedPreferences("DIY", MODE_PRIVATE).edit().putInt("title", i).commit();
                 }
-
                 dialog.cancel();
             }
         });
         more_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 dialog.cancel();
             }
         });
@@ -2196,7 +2174,6 @@ public class IndexActivity extends FragmentActivity {
         TextView menu_2_check = view.findViewById(R.id.menu_2_check);
         menu_1_check.setVisibility(View.GONE);
         menu_2_check.setVisibility(View.GONE);
-
         menu_1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -2217,7 +2194,7 @@ public class IndexActivity extends FragmentActivity {
     }
 
     //模拟60条数据
-    public void Download_Menu() {
+    public void Download_Menu(String data,String a,String b) {
         LayoutInflater inflater = LayoutInflater.from(IndexActivity.this);
         View view = inflater.inflate(R.layout.menu_dialog, null);
         // 对话框
@@ -2233,25 +2210,24 @@ public class IndexActivity extends FragmentActivity {
         dialog.getWindow().setAttributes(lp);
         dialog.getWindow().setContentView(view);
         TextView menu_1 = view.findViewById(R.id.menu_1);
-        menu_1.setText("内置下载器");
+        menu_1.setText(a);
         TextView menu_2 = view.findViewById(R.id.menu_2);
-        menu_2.setText("ADM");
+        menu_2.setText(b);
         TextView menu_1_check = view.findViewById(R.id.menu_1_check);
         TextView menu_2_check = view.findViewById(R.id.menu_2_check);
-
         SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
-        String home = sharedPreferences.getString("DownloadBy", "内置下载器");
-        if (Objects.equals(home, "内置下载器")) {
+        String home = sharedPreferences.getString(data, a);
+        Log.w("home",""+home+a);
+        if (Objects.equals(home, a)) {
             menu_1_check.setText("●");
-        } else if (Objects.equals(home, "ADM")) {
+        } else if (Objects.equals(home, b)) {
             menu_2_check.setText("●");
         }
-
         menu_1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 SharedPreferences.Editor sharedPreferences = getSharedPreferences("data", MODE_PRIVATE).edit();
-                sharedPreferences.putString("DownloadBy", "内置下载器");
+                sharedPreferences.putString(data, a);
                 sharedPreferences.commit();
                 dialog.cancel();
             }
@@ -2260,7 +2236,7 @@ public class IndexActivity extends FragmentActivity {
             @Override
             public void onClick(View view) {
                 SharedPreferences.Editor sharedPreferences = getSharedPreferences("data", MODE_PRIVATE).edit();
-                sharedPreferences.putString("DownloadBy", "ADM");
+                sharedPreferences.putString(data, b);
                 sharedPreferences.commit();
                 dialog.cancel();
             }
@@ -2284,14 +2260,13 @@ public class IndexActivity extends FragmentActivity {
         dialog.getWindow().setAttributes(lp);
         dialog.getWindow().setContentView(view);
         TextView menu_1 = view.findViewById(R.id.menu_1);
-
         TextView menu_2 = view.findViewById(R.id.menu_2);
-
         TextView menu_1_check = view.findViewById(R.id.menu_1_check);
         TextView menu_2_check = view.findViewById(R.id.menu_2_check);
+        menu_1_check.setVisibility(View.GONE);
+        menu_2_check.setVisibility(View.GONE);
         if(Objects.equals(type, "搜索引擎"))
         {
-
             menu_2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -2318,7 +2293,6 @@ public class IndexActivity extends FragmentActivity {
             menu_2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
                     dialog.cancel();
                 }
             });
@@ -2350,10 +2324,9 @@ public class IndexActivity extends FragmentActivity {
         WindowManager windowManager = getWindowManager();
         Display display = windowManager.getDefaultDisplay();
         WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
-        lp.width = display.getWidth(); // 设置宽度
+        lp.width = display.getWidth()-150; // 设置宽度
         dialog.getWindow().setAttributes(lp);
         dialog.getWindow().setContentView(view);
-
         EditText more_name = view.findViewById(R.id.more_name);
         EditText more_content = view.findViewById(R.id.more_content);
         more_content.setVisibility(View.GONE);
@@ -2361,11 +2334,10 @@ public class IndexActivity extends FragmentActivity {
         more_title.setText("DIY主页");
         TextView more_sure = view.findViewById(R.id.more_sure);
         TextView more_cancel = view.findViewById(R.id.more_cancel);
-
         more_sure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (more_name.getText().toString().equals("") || more_content.getText().toString().equals("")) {
+                if (more_name.getText().toString().equals("")) {
                     ToastUtil.Toast(IndexActivity.this, "不能为空");
                 } else {
                     SQLiteOpenHelper dbHelper = new Database(IndexActivity.this, "Database", null, 1);
@@ -2380,22 +2352,21 @@ public class IndexActivity extends FragmentActivity {
                                     ToastUtil.Toast(IndexActivity.this, "名称已经存在，换一个吧");
                                 }
                             });
-
                         } else {
                             String toresult = Base64.encodeToString(content.getBytes(), Base64.DEFAULT);
                             String sql = "insert into Homepage(title,content) values(\"" + "本地主页：" + more_name.getText().toString() + "\",\"" + toresult + "\")";
                             db.execSQL(sql);
                             dialog.cancel();
+                            edit_script.setVisibility(View.GONE);
                             ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
                             Cursor cursor = db.query("Homepage", null, null, null, null, null, "id desc");
                             SharedPreferences sharedPreferences = getSharedPreferences("Homepage", MODE_PRIVATE);
-                            String home = sharedPreferences.getString("Homepage", "主页");
+                            String home = sharedPreferences.getString("Homepage", "本地主页：主页");
                             if (cursor != null && cursor.getCount() > 0) {
                                 if_exsit = true;
                                 while (cursor.moveToNext()) {
                                     get_id = cursor.getInt(0);//得到int型的自增变量
                                     String get_title = cursor.getString(1);
-                                    String get_content = cursor.getString(2);
                                     HashMap<String, Object> map = new HashMap<String, Object>();
                                     map.put("title", get_title);
                                     map.put("Homepage", home);
@@ -2405,9 +2376,7 @@ public class IndexActivity extends FragmentActivity {
                                     moreAdpter.setOnItemClickListener(new MoreAdpter.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(View view, int position, String name) {
-
                                             TextView tv = view.findViewById(R.id.user);
-
                                             if (tv.getText().toString().equals("○")) {
                                                 tv.setText("●");
                                                 SharedPreferences.Editor sharedPreferences = getSharedPreferences("Homepage", MODE_PRIVATE).edit();
@@ -2435,15 +2404,12 @@ public class IndexActivity extends FragmentActivity {
                             }
                             db.close();
                         }
-
-
                     }
                 }
             }
         });
 
         more_cancel.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
                 dialog.cancel();
@@ -2453,7 +2419,6 @@ public class IndexActivity extends FragmentActivity {
 
     //模拟60条数据
     public void Network_Dialog() {
-
         LayoutInflater inflater = LayoutInflater.from(IndexActivity.this);
         View view = inflater.inflate(R.layout.more_dialog, null);
         // 对话框
@@ -2465,10 +2430,9 @@ public class IndexActivity extends FragmentActivity {
         WindowManager windowManager = getWindowManager();
         Display display = windowManager.getDefaultDisplay();
         WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
-        lp.width = display.getWidth(); // 设置宽度
+        lp.width = display.getWidth()-150; // 设置宽度
         dialog.getWindow().setAttributes(lp);
         dialog.getWindow().setContentView(view);
-
         EditText more_name = view.findViewById(R.id.more_name);
         EditText more_content = view.findViewById(R.id.more_content);
         more_name.setHint("主页名称");
@@ -2520,7 +2484,6 @@ public class IndexActivity extends FragmentActivity {
                                 // map.put("is",)
                                 list.add(map);
                                 //new String  数据来源， new int 数据到哪去\
-
                                 // moreAdpter=new MoreAdpter(get_title,get_content);
                                 moreAdpter = new MoreAdpter(list, "homepage");
                                 more_list.setAdapter(moreAdpter);
@@ -2572,7 +2535,6 @@ public class IndexActivity extends FragmentActivity {
             }
         });
     }
-
     //模拟60条数据
     public void UserAgent_Dialog() {
         LayoutInflater inflater = LayoutInflater.from(IndexActivity.this);
@@ -2598,7 +2560,6 @@ public class IndexActivity extends FragmentActivity {
         more_title.setText("添加UserAgent");
         TextView more_sure = view.findViewById(R.id.more_sure);
         TextView more_cancel = view.findViewById(R.id.more_cancel);
-
         more_sure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -2691,7 +2652,6 @@ public class IndexActivity extends FragmentActivity {
     }
 
     public void createFile(String path, String content) {
-
         File mFile = new File(path);
         //判断文件是否存在，存在就删除
         if (mFile.exists()) {
@@ -2711,7 +2671,6 @@ public class IndexActivity extends FragmentActivity {
 
     //模拟60条数据
     public void addAdblock_Dialog() {
-
         LayoutInflater inflater = LayoutInflater.from(IndexActivity.this);
         View view = inflater.inflate(R.layout.addadblock_dialog, null);
         // 对话框
@@ -2726,8 +2685,6 @@ public class IndexActivity extends FragmentActivity {
         lp.width = display.getWidth(); // 设置宽度
         dialog.getWindow().setAttributes(lp);
         dialog.getWindow().setContentView(view);
-
-
         EditText adblock_edit = view.findViewById(R.id.adblock_edit);
         TextView adblock_sure = view.findViewById(R.id.adblock_sure);
         adblock_sure.setOnClickListener(new View.OnClickListener() {
@@ -2767,7 +2724,6 @@ public class IndexActivity extends FragmentActivity {
         lp.width = display.getWidth() - 150; // 设置宽度
         dialog.getWindow().setAttributes(lp);
         dialog.getWindow().setContentView(view);
-
         EditText file_edit = view.findViewById(R.id.file_edit);
         TextView file_sure = view.findViewById(R.id.file_sure);
         file_edit.setHint("收藏夹名称");
@@ -2813,7 +2769,7 @@ public class IndexActivity extends FragmentActivity {
     }
 
     //数据库添加数据（历史记录表）
-    public void add_history(String title, String url) {
+    public void add_history(String title, String url,Bitmap icon) {
         //第二个参数是数据库名
         SimpleDateFormat formatter = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss"); //设置时间格式
         formatter.setTimeZone(TimeZone.getTimeZone("GMT+08")); //设置时区
@@ -2822,15 +2778,21 @@ public class IndexActivity extends FragmentActivity {
 
         SQLiteOpenHelper dbHelper = new Database(this, "Database", null, 1);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+
         ContentValues values = new ContentValues();
         values.put("title", title);
         values.put("url", url);
+        if(icon==null)
+        {
+            values.put("icon","");
+        }else
+        {
+            values.put("icon",Util.bitmapToBase64(icon));
+        }
         values.put("date", createDate);
-        //insert（）方法中第一个参数是表名，第二个参数是表示给表中未指定数据的自动赋值为NULL。第三个参数是一个ContentValues对象
         db.insert("History", null, values);
         query_history();
     }
-
     //数据库逆序查询函数：
     public void query_history() {
         array.clear();
@@ -2847,34 +2809,49 @@ public class IndexActivity extends FragmentActivity {
                 get_id = cursor.getInt(0);//得到int型的自增变量
                 String get_title = cursor.getString(1);
                 String get_url = cursor.getString(2);
-                String get_date = cursor.getString(3);
+                String get_icon = cursor.getString(3);
+                String get_date = cursor.getString(4);
                 HashMap<String, Object> map = new HashMap<String, Object>();
                 map.put("title", get_title);
                 map.put("url", get_url);
+                if(get_icon!=null&& !get_icon.equals(""))
+                {
+                    map.put("icon",Util.bitmapToDrawable(Util.base64ToBitmap(get_icon)));
+                }else
+                {
+                    map.put("icon",R.drawable.ic_webicon);
+                }
                 map.put("date", get_date);
                 array.add(get_id);
                 listItem.add(map);
-                //new String  数据来源， new int 数据到哪去
-                SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.list_item, new String[]{"title", "url", "date"}, new int[]{R.id.list_title, R.id.list_url, R.id.list_date});
+                SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.list_item, new String[]{"title", "url","icon", "date"}, new int[]{R.id.list_title, R.id.list_url,R.id.webicon, R.id.list_date});
                 settinglist2.setAdapter(mSimpleAdapter);//为ListView绑定适配器
+                mSimpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
+                    @Override
+                    public boolean setViewValue(View view, Object o, String s) {
+                        if(view instanceof ImageView && o instanceof Drawable){
+                            ImageView iv = (ImageView)view;
+                            iv.setImageDrawable((Drawable)o);
+                            iv.setBackgroundColor(Color.TRANSPARENT);
+                           // iv.setImageBitmap(Util.drawableToBitamp((Drawable)o));
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    }
+                });
             }
         } else {
-            if_exsit = false;
-            HashMap<String, Object> map = new HashMap<String, Object>();
-            map.put("title", "暂时没有浏览记录");
-            map.put("url", "此处是存放您历史记录地方");
-            listItem.add(map);
-            //new String  数据来源， new int 数据到哪去
-            SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.list_item, new String[]{"title", "url"}, new int[]{R.id.list_title, R.id.list_url});
+            SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.list_item, new String[]{"title", "url","icon", "date"}, new int[]{R.id.list_title, R.id.list_url,R.id.webicon, R.id.list_date});
             settinglist2.setAdapter(mSimpleAdapter);//为ListView绑定适配器
         }
-
         cursor.close();
         db.close();
     }
 
     //数据库逆序查询函数：
     public void query_collect() {
+        array_collect.clear();
         final ArrayList<HashMap<String, Object>> listItem = new ArrayList<HashMap<String, Object>>();/*在数组中存放数据*/
         SQLiteOpenHelper dbHelper = new Database(this, "Database", null, 1);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -2882,23 +2859,20 @@ public class IndexActivity extends FragmentActivity {
         if (cursor != null && cursor.getCount() > 0) {
             if_exsit = true;
             while (cursor.moveToNext()) {
+                int get_id = cursor.getInt(0);//得到int型的自增变量
                 String get_title = cursor.getString(1);
                 String get_content = cursor.getString(2);
+                array_collect.add(get_id);
                 HashMap<String, Object> map = new HashMap<String, Object>();
                 map.put("title", get_title);
                 map.put("content", get_content);
                 listItem.add(map);
+
                 //new String  数据来源， new int 数据到哪去
                 SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.collect_item, new String[]{"title", "content"}, new int[]{R.id.list_title, R.id.list_url});
                 settinglist4.setAdapter(mSimpleAdapter);//为ListView绑定适配器
             }
         } else {
-            if_exsit = false;
-            HashMap<String, Object> map = new HashMap<String, Object>();
-            map.put("title", "暂时没有收藏");
-            map.put("content", "此处是存放您收藏的地方");
-            listItem.add(map);
-            //new String  数据来源， new int 数据到哪去
             SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.collect_item, new String[]{"title", "content"}, new int[]{R.id.list_title, R.id.list_url});
             settinglist4.setAdapter(mSimpleAdapter);//为ListView绑定适配器
         }
@@ -2924,8 +2898,6 @@ public class IndexActivity extends FragmentActivity {
         return url;
     }
 
-
-
     //删除函数：
     public void history_empty() {
         SQLiteOpenHelper dbHelper = new Database(this, "Database", null, 1);
@@ -2935,9 +2907,7 @@ public class IndexActivity extends FragmentActivity {
         ToastUtil.Toast(IndexActivity.this, "清空成功");
         //删除后清空数组，重新放入数据，刷新UI
         array.clear();
-
     }
-
 
     //按值查找：
     public String query_homepage_name(String name) {
@@ -2968,7 +2938,6 @@ public class IndexActivity extends FragmentActivity {
                 SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.list_item, new String[]{"title"}, new int[]{R.id.list_title});
                 settinglist3.setAdapter(mSimpleAdapter);//为ListView绑定适配器
             }
-
             for (File file2 : files) {
                 HashMap<String, Object> map = new HashMap<String, Object>();
                 //判断文件是否是文件夹9
@@ -2981,7 +2950,6 @@ public class IndexActivity extends FragmentActivity {
                 settinglist3.setAdapter(mSimpleAdapter);//为ListView绑定适配器
             }
         } else {
-
         }
     }
 
@@ -2997,10 +2965,9 @@ public class IndexActivity extends FragmentActivity {
             File[] files = file.listFiles();
             //判断文件是否为空
             if (files.length == 0) {
-                SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.list_item, new String[]{"title", "url"}, new int[]{R.id.list_title, R.id.list_url});
+                SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.list_item, new String[]{"icon","title", "url", "date"}, new int[]{R.id.webicon,R.id.list_title, R.id.list_url, R.id.list_date});
                 settinglist.setAdapter(mSimpleAdapter);//为ListView绑定适配器
             }
-
             for (File file2 : files) {
                 HashMap<String, Object> map = new HashMap<String, Object>();
                 HashMap<String, Object> f = new HashMap<String, Object>();
@@ -3011,9 +2978,10 @@ public class IndexActivity extends FragmentActivity {
                     long time = file.lastModified();
                     SimpleDateFormat formatter = new SimpleDateFormat(mformatType);
                     cal.setTimeInMillis(time);
+                    map.put("icon",R.drawable.ic_file);
                     map.put("title", file2.getName());
                     map.put("url", "文件夹");
-                    map.put("data", formatter.format(cal.getTime()));
+                    map.put("date", formatter.format(cal.getTime()));
                     listItem.add(map);
                 } else {
                     try {
@@ -3030,9 +2998,10 @@ public class IndexActivity extends FragmentActivity {
                             //将读取到的内容放入结果字符串
                             result.append(line);
                         }
+                        f.put("icon",R.drawable.ic_webicon);
                         f.put("title", file2.getName());
                         f.put("url", result);
-                        f.put("data", formatter.format(cal.getTime()));
+                        f.put("date", formatter.format(cal.getTime()));
                         list.add(f);
 
                     } catch (IOException e) {
@@ -3041,14 +3010,13 @@ public class IndexActivity extends FragmentActivity {
                 }
             }
             listItem.addAll(list);
-            SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.list_item, new String[]{"title", "url", "data"}, new int[]{R.id.list_title, R.id.list_url, R.id.list_date});
+            SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.list_item, new String[]{"icon","title", "url", "date"}, new int[]{R.id.webicon,R.id.list_title, R.id.list_url, R.id.list_date});
             settinglist.setAdapter(mSimpleAdapter);//为ListView绑定适配器
 
         } else {
             System.out.println("文件不存在！");
         }
     }
-
     public void showAdblock(String path) {
         final ArrayList<HashMap<String, Object>> listItem = new ArrayList<HashMap<String, Object>>();/*在数组中存放数据*/
         File file = new File(path);
@@ -3075,7 +3043,6 @@ public class IndexActivity extends FragmentActivity {
                     listItem.add(map);
 
                 }
-
                 SimpleAdapter mSimpleAdapter = new SimpleAdapter(this, listItem, R.layout.list, new String[]{"title", "user"}, new int[]{R.id.list_title, R.id.adblock_user});
                 adblock_list.setAdapter(mSimpleAdapter);//为ListView绑定适配器
             }
@@ -3085,9 +3052,7 @@ public class IndexActivity extends FragmentActivity {
     }
 
     public void downloadAdblock(String path, String url) {
-
         new Thread(new Runnable() {
-
             @Override
             public void run() {
                 String adb = DownloadHelper.downloadAdblock(url);
@@ -3151,14 +3116,32 @@ public class IndexActivity extends FragmentActivity {
 
     //删除函数：
     public void delete(int position) {
-        SQLiteOpenHelper dbHelper = new Database(this, "Database", null, 1);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete("History", "id=?", new String[]{String.valueOf(array.get(position))});
-        db.close();
-        ToastUtil.Toast(IndexActivity.this, "删除成功");
-        //删除后清空数组，重新放入数据，刷新UI
-        array.clear();
+        try{
+            SQLiteOpenHelper dbHelper = new Database(this, "Database", null, 1);
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            db.delete("History", "id=?", new String[]{String.valueOf(array.get(position))});
+            db.close();
+            ToastUtil.Toast(IndexActivity.this, "删除成功");
+            array.clear();
+        }catch (Exception e)
+        {
+            ToastUtil.Toast(IndexActivity.this, "删除失败");
+        }
+    }
 
+    //删除函数：
+    public void delete_collect(int position) {
+        try{
+            SQLiteOpenHelper dbHelper = new Database(this, "Database", null, 1);
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            db.delete("Card", "id=?", new String[]{String.valueOf(array_collect.get(position))});
+            db.close();
+            ToastUtil.Toast(IndexActivity.this, "删除成功");
+            array_collect.clear();
+        }catch (Exception e)
+        {
+            ToastUtil.Toast(IndexActivity.this, "删除失败");
+        }
     }
 
 
@@ -3166,7 +3149,6 @@ public class IndexActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_index);
-
         table_text = findViewById(R.id.table);
         table = findViewById(R.id.table_dialog);
         ps = findViewById(R.id.pg);
@@ -3181,7 +3163,6 @@ public class IndexActivity extends FragmentActivity {
         index = findViewById(R.id.index);
         new_script = findViewById(R.id.new_script);
         add_file = findViewById(R.id.add_file);
-
         more_add = findViewById(R.id.more_add);
         WebConfig = findViewById(R.id.WebConfig);
         search = findViewById(R.id.search);
@@ -3201,6 +3182,18 @@ public class IndexActivity extends FragmentActivity {
         about = findViewById(R.id.about);
         SizeSettings = findViewById(R.id.size_settings);
         back_setting = findViewById(R.id.back_setting);
+        video_view=findViewById(R.id.video_view);
+        view_log=findViewById(R.id.view_log);
+        log_view=findViewById(R.id.log_view);
+        mSimpleAdapter = new SimpleAdapter(IndexActivity.this, listItem, R.layout.collect_item, new String[]{"title", "content"}, new int[]{R.id.list_title, R.id.list_url});
+        mySimpleAdapter = new SimpleAdapter(IndexActivity.this, resources, R.layout.collect_item, new String[]{"type", "url"}, new int[]{R.id.list_title, R.id.list_url});
+
+
+
+        view_video=(LinearLayout)findViewById(R.id.view_video);
+        resource_list=findViewById(R.id.resource_list);
+        WebIconDatabase.getInstance().open(FileUtil.getDirs(getCacheDir().getAbsolutePath()+"/icons/"));
+
         back_setting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -3288,7 +3281,6 @@ public class IndexActivity extends FragmentActivity {
                 view_image.setVisibility(View.GONE);
             }
         });
-
         fileManager = new FileManager(IndexActivity.this);
         Webapk = getSharedPreferences("data", MODE_PRIVATE).getString("setting_apk", "询问");
         Webcamera = getSharedPreferences("data", MODE_PRIVATE).getBoolean("setting_camera", false);
@@ -3332,12 +3324,13 @@ public class IndexActivity extends FragmentActivity {
 
             }
         });
+
+
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if ("text/plain".equals(type)) {
-
                 String uri = intent.getStringExtra(Intent.EXTRA_TEXT);
                 addView(ListViews, uri, 0, null);
             } else if ("application/xhtml+xml".equals(type) || "text/html".equals(type) || "application/vnd.wap.xhtml+xml".equals(type)) {
@@ -3350,15 +3343,13 @@ public class IndexActivity extends FragmentActivity {
         } else {
             initWeb();
         }
+
         frame = findViewById(R.id.frame);
         table_add = findViewById(R.id.add_table);
         full = findViewById(R.id.full);
-        RelativeLayout.LayoutParams paramsss = (RelativeLayout.LayoutParams) full.getLayoutParams();
-        paramsss.bottomMargin = IndexActivity.getNavBarHeight(IndexActivity.this) + SizeUtil.dp2px(IndexActivity.this, 45);
-        full.setLayoutParams(paramsss);
+
 
         table_text.setText(String.valueOf(final_count));
-
         downloads_ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -3392,6 +3383,7 @@ public class IndexActivity extends FragmentActivity {
 
                 } else {
                     try {
+
                         Intent shortcutIntent = new Intent(IndexActivity.this, IndexActivity.class);
                         shortcutIntent.setData(Uri.parse(itemlistViewAll.get(countlist.get(count)).get(listview).getUrl()));
                         shortcutIntent.addCategory(Intent.CATEGORY_LAUNCHER);// 加入action,和category之后，程序卸载的时候才会主动将该快捷方式也卸载
@@ -3548,7 +3540,6 @@ public class IndexActivity extends FragmentActivity {
         more_text = findViewById(R.id.more_text);
         more_list.setLayoutManager(new LinearLayoutManager(this));
         more_list.setItemAnimator(new DefaultItemAnimator());
-
         go_back = findViewById(R.id.go_back);
         go_back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -3567,8 +3558,6 @@ public class IndexActivity extends FragmentActivity {
                 }
             }
         });
-
-
         //downloadAdapter = new NativeDownloadAdapter();
         mRecyclerView = findViewById(R.id.download_recyclerview);
         downloaded_recyclerview = findViewById(R.id.downloaded_recyclerview);
@@ -3588,16 +3577,39 @@ public class IndexActivity extends FragmentActivity {
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) main.getLayoutParams();
         params.topMargin = getStatusBarHeight(this);
         main.setLayoutParams(params);
-
+        LinearLayout resource_view=findViewById(R.id.resource_view);
         bottomView = findViewById(R.id.bottomView);
+        RelativeLayout.LayoutParams paramssss = (RelativeLayout.LayoutParams) toast_view.getLayoutParams();
+        RelativeLayout.LayoutParams p = (RelativeLayout.LayoutParams) resource_view.getLayoutParams();
+        RelativeLayout.LayoutParams paramsss = (RelativeLayout.LayoutParams) full.getLayoutParams();
+        RelativeLayout.LayoutParams pp = (RelativeLayout.LayoutParams) table.getLayoutParams();
+        if(checkDeviceHasNavigationBar(this))
+        {
+            paramssss.bottomMargin = getNavBarHeight(this) + SizeUtil.dp2px(this, 45);
+            toast_view.setLayoutParams(paramssss);
+            p.bottomMargin = getNavBarHeight(this) + SizeUtil.dp2px(IndexActivity.this, 45);
+            resource_view.setLayoutParams(p);
+            paramsss.bottomMargin = getNavBarHeight(IndexActivity.this) + SizeUtil.dp2px(IndexActivity.this, 45);
+            full.setLayoutParams(paramsss);
+            LinearLayout.LayoutParams paramss = (LinearLayout.LayoutParams) bottomView.getLayoutParams();
+            paramss.bottomMargin = getNavBarHeight(this);
+            bottomView.setLayoutParams(paramss);
+            pp.bottomMargin = getNavBarHeight(this) + SizeUtil.dp2px(IndexActivity.this, 45);
+            table.setLayoutParams(pp);
+        }else
+        {
+            paramssss.bottomMargin = SizeUtil.dp2px(this, 45);
+            toast_view.setLayoutParams(paramssss);
+            paramsss.bottomMargin = SizeUtil.dp2px(IndexActivity.this, 45);
+            full.setLayoutParams(paramsss);
+            p.bottomMargin =  SizeUtil.dp2px(IndexActivity.this, 45);
+            resource_view.setLayoutParams(p);
+            pp.bottomMargin =  SizeUtil.dp2px(IndexActivity.this, 45);
+            table.setLayoutParams(pp);
+        }
 
-        LinearLayout.LayoutParams paramss = (LinearLayout.LayoutParams) bottomView.getLayoutParams();
-        paramss.bottomMargin = getNavBarHeight(this);
-        bottomView.setLayoutParams(paramss);
 
-        RelativeLayout.LayoutParams p = (RelativeLayout.LayoutParams) table.getLayoutParams();
-        p.bottomMargin = getNavBarHeight(this) + SizeUtil.dp2px(IndexActivity.this, 45);
-        table.setLayoutParams(p);
+
 
         script_edit = findViewById(R.id.script_edit);
         edit_script = findViewById(R.id.edit_script);
@@ -3606,11 +3618,9 @@ public class IndexActivity extends FragmentActivity {
         script_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 if (Objects.equals(editType, "script")) {
                     if (isNewScript) {
                         saveScript(script_edit.getText().toString(), "http://ddonging.online");
-
                     } else {
                         saveScript(script_edit.getText().toString(), downloadScriptUrl);
                     }
@@ -3629,10 +3639,7 @@ public class IndexActivity extends FragmentActivity {
                        {
                            ToastUtil.Toast(IndexActivity.this,"修改失败:"+e);
                        }
-
-
                 }
-
             }
         });
         new_script.setOnClickListener(new View.OnClickListener() {
@@ -3651,7 +3658,6 @@ public class IndexActivity extends FragmentActivity {
         View history = LayoutInflater.from(this).inflate(R.layout.history, null);
         View downloadwebpage = LayoutInflater.from(this).inflate(R.layout.downloadweb, null);
         View collect = LayoutInflater.from(this).inflate(R.layout.collect, null);
-
         settinglist = bookmark.findViewById(R.id.list);
         OverScrollDecoratorHelper.setUpOverScroll(settinglist);
         settinglist2 = history.findViewById(R.id.list);
@@ -3681,12 +3687,67 @@ public class IndexActivity extends FragmentActivity {
         });
 
          */
-        settinglist4.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        log_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                TextView tv=view.findViewById(R.id.list_url);
+                view_log.setVisibility(View.GONE);
+                viewpager.setVisibility(View.VISIBLE);
+                destory();
+                viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
+                addWebView(tv.getText().toString());
+            }
+        });
+        resource_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                TextView tv=view.findViewById(R.id.list_url);
+                resource_list.setVisibility(View.GONE);
+                video_view.setUp(tv.getText().toString(), "视频查看", JzvdStd.STATE_NORMAL);    //设置视频
+                viewpager.setVisibility(View.INVISIBLE);
+                view_video.setVisibility(View.VISIBLE);
+            }
+        });
 
-
+        resource_list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
+                ItemLongClickedPopWindow itemLongClickedPopWindow = new ItemLongClickedPopWindow(IndexActivity.this, ItemLongClickedPopWindow.COLLECT_VIEW_POPUPWINDOW, SizeUtil.dp2px(IndexActivity.this, 120), SizeUtil.dp2px(IndexActivity.this, 220), position);
+                itemLongClickedPopWindow.showAtLocation(view, Gravity.TOP | Gravity.LEFT, xDown, yDown);
+                itemLongClickedPopWindow.getView(R.id.item_delete).setVisibility(View.GONE);
+                itemLongClickedPopWindow.getView(R.id.copy_content).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        TextView is = view.findViewById(R.id.list_url);
+                        ClipboardManager cmb = (ClipboardManager) IndexActivity.this.getSystemService(Context.CLIPBOARD_SERVICE);
+                        cmb.setText(is.getText().toString().trim());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ToastUtil.Toast(IndexActivity.this, "复制成功");
+                            }
+                        });
+                        itemLongClickedPopWindow.dismiss();
+                    }
+                });
 
+                itemLongClickedPopWindow.getView(R.id.item_open).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        TextView tv=view.findViewById(R.id.list_url);
+                        resource_list.setVisibility(View.GONE);
+                        video_view.setUp(tv.getText().toString(), "视频查看", JzvdStd.STATE_NORMAL);    //设置视频
+                        viewpager.setVisibility(View.INVISIBLE);
+                        view_video.setVisibility(View.VISIBLE);
+                        itemLongClickedPopWindow.dismiss();
+                    }});
+                return true;
+            }
+        });
+
+        settinglist4.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
                 ItemLongClickedPopWindow itemLongClickedPopWindow = new ItemLongClickedPopWindow(IndexActivity.this, ItemLongClickedPopWindow.COLLECT_VIEW_POPUPWINDOW, SizeUtil.dp2px(IndexActivity.this, 120), SizeUtil.dp2px(IndexActivity.this, 220), position);
                 itemLongClickedPopWindow.showAtLocation(view, Gravity.TOP | Gravity.LEFT, xDown, yDown);
                 itemLongClickedPopWindow.getView(R.id.copy_content).setOnClickListener(new View.OnClickListener() {
@@ -3705,6 +3766,15 @@ public class IndexActivity extends FragmentActivity {
                         itemLongClickedPopWindow.dismiss();
                     }
                 });
+                itemLongClickedPopWindow.getView(R.id.item_delete).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        delete_collect(position);
+                        query_collect();
+                        itemLongClickedPopWindow.dismiss();
+                    }
+                });
+
                 itemLongClickedPopWindow.getView(R.id.item_open).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -3724,23 +3794,30 @@ public class IndexActivity extends FragmentActivity {
         settinglist2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (if_exsit) {
-                    viewlist.setVisibility(View.GONE);
-                    for (int i = WebPageAll.get(countlist.get(count)).size() - 1; i > itempager[countlist.get(count)].getCurrentItem(); i--) {
-                        itemlistViewAll.get(countlist.get(count)).get(i).destroy();
-                        viewPagerAdapter[countlist.get(count)].destroyItem(itempager[countlist.get(count)], i, "");
-                        WebPageAll.get(countlist.get(count)).remove(i);
-                        itemlistViewAll.get(countlist.get(count)).remove(i);
-                        WebPageTitleAll.get(countlist.get(count)).remove(i);
-                        WebPageIconAll.get(countlist.get(count)).remove(i);
+                TextView is = view.findViewById(R.id.list_url);
+                if(is.getText().toString().startsWith("javascript:"))
+                {
+                    View vi = getCurrentFocus();
+                    closeKeyboard(vi);
+                    api.setVisibility(View.GONE);
+                    itemlistViewAll.get(countlist.get(count)).get(listview).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            itemlistViewAll.get(countlist.get(count)).get(listview).evaluateJavascript(webtitle.getText().toString(),null);
+                        }
+                    });
+                }else
+                {
+                    if (if_exsit) {
+                        viewlist.setVisibility(View.GONE);
+                        destory();
+                        viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
+                        addWebView(query_history_id(position));
                     }
-                    viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
-                    addWebView(query_history_id(position));
                 }
             }
         });
         settinglist2.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 ItemLongClickedPopWindow itemLongClickedPopWindow = new ItemLongClickedPopWindow(IndexActivity.this, ItemLongClickedPopWindow.FAVORITES_ITEM_POPUPWINDOW, SizeUtil.dp2px(IndexActivity.this, 120), SizeUtil.dp2px(IndexActivity.this, 220), position);
@@ -3777,7 +3854,6 @@ public class IndexActivity extends FragmentActivity {
                         File folder = IndexActivity.this.getExternalFilesDir("bookmark");
                         TextView li = view.findViewById(R.id.list_title);
                         TextView is = view.findViewById(R.id.list_url);
-
                         addWebView(is.getText().toString());
                         viewlist.setVisibility(View.GONE);
 
@@ -3787,9 +3863,6 @@ public class IndexActivity extends FragmentActivity {
                 itemLongClickedPopWindow.getView(R.id.item_longclicked_delete).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        File folder = IndexActivity.this.getExternalFilesDir("bookmark");
-                        TextView li = view.findViewById(R.id.list_title);
-                        TextView is = view.findViewById(R.id.list_url);
                         delete(position);
                         query_history();
                         itemLongClickedPopWindow.dismiss();
@@ -3831,19 +3904,25 @@ public class IndexActivity extends FragmentActivity {
                 TextView is = view.findViewById(R.id.list_url);
                 if (is.getText().toString().equals("文件夹")) {
                     showFile(bookmarkpath + "/" + li.getText().toString());
-                } else {
-                    for (int i = WebPageAll.get(countlist.get(count)).size() - 1; i > itempager[countlist.get(count)].getCurrentItem(); i--) {
-                        itemlistViewAll.get(countlist.get(count)).get(i).destroy();
-                        viewPagerAdapter[countlist.get(count)].destroyItem(itempager[countlist.get(count)], i, "");
-                        WebPageAll.get(countlist.get(count)).remove(i);
-                        itemlistViewAll.get(countlist.get(count)).remove(i);
-                        WebPageTitleAll.get(countlist.get(count)).remove(i);
-                        WebPageIconAll.get(countlist.get(count)).remove(i);
-                    }
+                } else  if(is.getText().toString().startsWith("javascript:"))
+                {
+                    viewlist.setVisibility(View.GONE);
+                    itemlistViewAll.get(countlist.get(count)).get(listview).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            itemlistViewAll.get(countlist.get(count)).get(listview).evaluateJavascript(is.getText().toString(),null);
+                        }
+                    });
+                }
+                else {
+                    destory();
                     viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
                     addWebView(is.getText().toString());
                     viewlist.setVisibility(View.GONE);
                 }
+
+
+
             }
         });
 
@@ -3931,7 +4010,6 @@ public class IndexActivity extends FragmentActivity {
             }
         });
 
-
         settinglist3.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -3959,8 +4037,6 @@ public class IndexActivity extends FragmentActivity {
         listView.add(history);
         listView.add(collect);
         listView.add(downloadwebpage);
-
-
         PagerAdapter = new ViewPagerAdapter(listView);
         pager.setAdapter(PagerAdapter);
         pager.setCanSwipe(false);
@@ -4019,8 +4095,6 @@ public class IndexActivity extends FragmentActivity {
 
         web = findViewById(R.id.web);
         settitle = findViewById(R.id.settings_title);
-
-
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         web.setWebChromeClient(new WebChromeClient());
@@ -4042,7 +4116,7 @@ public class IndexActivity extends FragmentActivity {
                         settitle.setText("个性化");
                         add.setVisibility(View.GONE);
                         break;
-                    case "file:///android_asset/Api.html":
+                    case "file:///android_asset/interface.html":
                         settitle.setText("接口管理");
                         ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
                         SQLiteOpenHelper dbHelper = new Database(IndexActivity.this, "Database", null, 1);
@@ -4110,16 +4184,22 @@ public class IndexActivity extends FragmentActivity {
                 if (itempager[countlist.get(count)].getCurrentItem() == 0) {
                     ToastUtil.Toast(IndexActivity.this, "当前页面不允许操作");
                 } else {
-                    touch = true;
+                    view_log.setVisibility(View.VISIBLE);
+                    viewpager.setVisibility(View.GONE);
+
+                    log_view.setAdapter(mySimpleAdapter);//为ListView绑定适配器
+                    /*
                     addWebView("file:///android_asset/NetWorkLog.html");
                     itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).post(new Runnable() {
                         @Override
                         public void run() {
                             JSONArray data = new JSONArray(resources);
-                            String renderList = "javascript:renderList('" + data + "')";
+                            String renderList = "javascript:LogList('" + data + "')";
                             itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).evaluateJavascript(renderList, null);
                         }
                     });
+
+                     */
                 }
             }
         });
@@ -4147,7 +4227,7 @@ public class IndexActivity extends FragmentActivity {
                     WebPageTitleAll.get(countlist.get(count)).remove(i);
                     WebPageIconAll.get(countlist.get(count)).remove(i);
                 }
-                addWebView("file:///android_asset/LoadApi.html");
+                addWebView("file:///android_asset/load.html");
             }
         });
         home_list.setItemAnimator(new DefaultItemAnimator());
@@ -4155,7 +4235,6 @@ public class IndexActivity extends FragmentActivity {
         adapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position, String text) {
-                // frameLayout.bringChildToFront(po);
                 table.setVisibility(View.GONE);
                 ps.setWebProgress(100);
                 viewpager.setCurrentItem(position, false);
@@ -4305,7 +4384,6 @@ public class IndexActivity extends FragmentActivity {
                         {
                             Log.w("Error updating","error:"+e);
                         }
-
                     }
 
                 } else {
@@ -4331,7 +4409,6 @@ public class IndexActivity extends FragmentActivity {
                 }
             }
         });
-
         goBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -4344,7 +4421,6 @@ public class IndexActivity extends FragmentActivity {
                 goForward();
             }
         });
-
         if (Build.VERSION.SDK_INT >= 21) {
             View decorView = getWindow().getDecorView();
             int option = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
@@ -4355,21 +4431,17 @@ public class IndexActivity extends FragmentActivity {
             setDarkStatusIcon(true);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
-
         Home = findViewById(R.id.Home);
         More = findViewById(R.id.More);
         (find) = findViewById(R.id.find);
         webtitle = findViewById(R.id.title);
-
         frameLayout = findViewById(R.id.framelayout);
         (add) = findViewById(R.id.add);
         table_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ps.setWebProgress(100);
-
                 table.setVisibility(View.GONE);
-
                 table_text.setText(String.valueOf(final_count + 1));
                 adapter.notifyItemInserted(list.size());
                 listviewAll.add(listview);
@@ -4388,7 +4460,6 @@ public class IndexActivity extends FragmentActivity {
             public void onClick(View view) {
                 if (table.getVisibility() == View.GONE) {
                     full.setVisibility(View.VISIBLE);
-
                     table.setVisibility(View.VISIBLE);
                     for (int i = 0; i < count + 1; i++) {
                         list.set(i, WebPageTitleAll.get(countlist.get(i)).get(itempager[countlist.get(i)].getCurrentItem()));
@@ -4411,7 +4482,6 @@ public class IndexActivity extends FragmentActivity {
                 itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).onResume();
                 viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
                 ps.setWebProgress(100);
-                Util.clearWebViewCache(IndexActivity.this);
             }
         });
         More.setOnClickListener(new View.OnClickListener() {
@@ -4420,7 +4490,6 @@ public class IndexActivity extends FragmentActivity {
                 Dialog();
             }
         });
-
         webtitle.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -4435,21 +4504,42 @@ public class IndexActivity extends FragmentActivity {
                         pscode.setVisibility(View.VISIBLE);
                         full.setVisibility(View.GONE);
                         String indexBackground = getSharedPreferences("data", MODE_PRIVATE).getString("indexBackground", "空白背景");
-                        if (isNight || Objects.equals(indexBackground, "空白背景")) {
+                        if(Objects.equals(indexBackground, "空白背景"))
+                        {
+
+                        }else
+                        {
                             search.setColorFilter(getResources().getColor(R.color.white));
                             find.setColorFilter(getResources().getColor(R.color.white));
                             api.setColorFilter(getResources().getColor(R.color.white));
                             webtitle.setTextColor(getResources().getColor(R.color.white));
                         }
-                        if (webtitle.getText().toString().startsWith("http://") || webtitle.getText().toString().startsWith("https://") || webtitle.getText().toString().startsWith("chrome://")) {
+                        /*
+
+
+                         */
+
+                        if (webtitle.getText().toString().startsWith("http://") || webtitle.getText().toString().startsWith("https://") || webtitle.getText().toString().startsWith("file://")) {
                             View vi = getCurrentFocus();
                             closeKeyboard(vi);
-                            mWebView[count].setBackgroundColor(Color.WHITE);
                             api.setVisibility(View.GONE);
                             touch = false;
                             destory();
                             addWebView(webtitle.getText().toString());
-                        } else {
+                        } else if(webtitle.getText().toString().startsWith("javascript:"))
+                        {
+                            View vi = getCurrentFocus();
+                            closeKeyboard(vi);
+                            api.setVisibility(View.GONE);
+                            itemlistViewAll.get(countlist.get(count)).get(listview).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    itemlistViewAll.get(countlist.get(count)).get(listview).evaluateJavascript(webtitle.getText().toString(),null);
+                                }
+                            });
+                        }
+                        else
+                         {
                             View vi = getCurrentFocus();
                             closeKeyboard(vi);
                             SQLiteOpenHelper dbHelper = new Database(IndexActivity.this, "Database", null, 1);
@@ -4484,6 +4574,7 @@ public class IndexActivity extends FragmentActivity {
                 } else {
                     top.setBackgroundColor(Color.TRANSPARENT);
                     pscode.setVisibility(View.VISIBLE);
+                    /*
                     String indexBackground = getSharedPreferences("data", MODE_PRIVATE).getString("indexBackground", "空白背景");
                     if (isNight || Objects.equals(indexBackground, "空白背景")) {
                         search.setColorFilter(getResources().getColor(R.color.white));
@@ -4491,51 +4582,68 @@ public class IndexActivity extends FragmentActivity {
                         api.setColorFilter(getResources().getColor(R.color.white));
                         webtitle.setTextColor(getResources().getColor(R.color.white));
                     }
+
+                     */
                     if (progress == 100 && !isOn) {
                         itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).reload();
                     } else {
-                        full.setVisibility(View.GONE);
-                        api.setVisibility(View.GONE);
-                        View v = getCurrentFocus();
-                        closeKeyboard(v);
-                        isOn = false;
-                        if (webtitle.getText().toString().startsWith("http://") || webtitle.getText().toString().startsWith("https://") || webtitle.getText().toString().startsWith("chrome://")) {
-                            mWebView[count].setBackgroundColor(Color.WHITE);
-                            touch = true;
-                            destory();
-                            addWebView(webtitle.getText().toString());
-                        } else if (webtitle.getText().toString().equals("file:///android_asset/index.html")) {
-                            mWebView[count].setBackgroundColor(0);
+                        if (progress < 100) {
+                            itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).stopLoading();
                         } else {
-                            mWebView[count].setBackgroundColor(Color.WHITE);
-                            touch = true;
-                            SQLiteOpenHelper dbHelper = new Database(IndexActivity.this, "Database", null, 1);
-                            SQLiteDatabase db = dbHelper.getWritableDatabase();
-                            if (db.isOpen()) {
-                                Cursor cursorr = db.rawQuery("SELECT content FROM Engines WHERE title='" + Engines + "'", null);
-                                if (cursorr.getCount() > 0) {
-                                    while (cursorr.moveToNext()) {
-                                        String Engines = cursorr.getString(cursorr.getColumnIndex("content"));
-                                        destory();
-                                        viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
-                                        addWebView(Engines + webtitle.getText().toString());
-                                    }
-                                }
+                            full.setVisibility(View.GONE);
+                            api.setVisibility(View.GONE);
+                            String indexBackground = getSharedPreferences("data", MODE_PRIVATE).getString("indexBackground", "空白背景");
+                            if(Objects.equals(indexBackground, "空白背景"))
+                            {
+
+                            }else
+                            {
+                                search.setColorFilter(getResources().getColor(R.color.white));
+                                find.setColorFilter(getResources().getColor(R.color.white));
+                                api.setColorFilter(getResources().getColor(R.color.white));
+                                webtitle.setTextColor(getResources().getColor(R.color.white));
                             }
 
+                            View v = getCurrentFocus();
+                            closeKeyboard(v);
+                            isOn = false;
+                            if (webtitle.getText().toString().startsWith("http://") || webtitle.getText().toString().startsWith("https://") || webtitle.getText().toString().startsWith("chrome://")) {
+                                mWebView[count].setBackgroundColor(Color.WHITE);
+                                touch = true;
+                                destory();
+                                addWebView(webtitle.getText().toString());
+                            } else if (webtitle.getText().toString().equals("file:///android_asset/index.html")) {
+                                mWebView[count].setBackgroundColor(0);
+                            } else {
+                                mWebView[count].setBackgroundColor(Color.WHITE);
+                                touch = true;
+                                SQLiteOpenHelper dbHelper = new Database(IndexActivity.this, "Database", null, 1);
+                                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                                if (db.isOpen()) {
+                                    Cursor cursorr = db.rawQuery("SELECT content FROM Engines WHERE title='" + Engines + "'", null);
+                                    if (cursorr.getCount() > 0) {
+                                        while (cursorr.moveToNext()) {
+                                            String Engines = cursorr.getString(cursorr.getColumnIndex("content"));
+                                            destory();
+                                            viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
+                                            addWebView(Engines + webtitle.getText().toString());
+                                        }
+                                    }
+                                }
 
+
+                            }
                         }
                     }
                 }
             }
         });
-
         webtitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
+                OnFocus= b;
                 isOn = true;
                 if (b) {
-
                     final ArrayList<HashMap<String, Object>> listItem = new ArrayList<HashMap<String, Object>>();/*在数组中存放数据*/
                     Cursor cursor = db.query("History", null, null, null, null, null, "id desc");
                     if (cursor != null && cursor.getCount() > 0) {
@@ -4543,14 +4651,16 @@ public class IndexActivity extends FragmentActivity {
                         while (cursor.moveToNext()) {
                             String get_title = cursor.getString(1);
                             String get_url = cursor.getString(2);
-                            String get_date = cursor.getString(3);
+                            String get_icon = cursor.getString(3);
+                            String get_date = cursor.getString(4);
                             HashMap<String, Object> map = new HashMap<String, Object>();
                             map.put("title", get_title);
                             map.put("url", get_url);
                             map.put("date", get_date);
                             listItem.add(map);
                             SimpleAdapter mSimpleAdapter = new SimpleAdapter(IndexActivity.this, listItem, R.layout.list_item, new String[]{"title", "url", "date"}, new int[]{R.id.list_title, R.id.list_url, R.id.list_date});
-                            webtitle.setAdapter(mSimpleAdapter);//给文本框绑定数据
+                            webtitle.setAdapter(mSimpleAdapter);//为ListView绑定适配器
+
                         }
                         webtitle.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             @Override
@@ -4558,6 +4668,7 @@ public class IndexActivity extends FragmentActivity {
                                 TextView tv =view.findViewById(R.id.list_url);
                                     top.setBackgroundColor(Color.TRANSPARENT);
                                     pscode.setVisibility(View.VISIBLE);
+                                    /*
                                     String indexBackground = getSharedPreferences("data", MODE_PRIVATE).getString("indexBackground", "空白背景");
                                     if (isNight || Objects.equals(indexBackground, "空白背景")) {
                                         search.setColorFilter(getResources().getColor(R.color.white));
@@ -4565,6 +4676,8 @@ public class IndexActivity extends FragmentActivity {
                                         api.setColorFilter(getResources().getColor(R.color.white));
                                         webtitle.setTextColor(getResources().getColor(R.color.white));
                                     }
+
+                                     */
                                         full.setVisibility(View.GONE);
                                         api.setVisibility(View.GONE);
                                         View v = getCurrentFocus();
@@ -4667,12 +4780,23 @@ public class IndexActivity extends FragmentActivity {
     }
 
     @JavascriptInterface
-    public String call_loadapi(String msg) {
+    public String call_load(String msg) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
-                itemlistViewAll.get(countlist.get(count)).get(listview).loadUrl(msg + apiTitle);
+                destory();
+                viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
+                addWebView(msg + apiTitle);
+            }
+        });
+        return "我是js调用安卓获取的数据";
+    }
+    @JavascriptInterface
+    public String api_set(String title,String url,String label) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Set_api(title,url,label);
             }
         });
         return "我是js调用安卓获取的数据";
@@ -4787,8 +4911,9 @@ public class IndexActivity extends FragmentActivity {
                     frame.setVisibility(View.GONE);
                     about.setVisibility(View.VISIBLE);
                 } else if (Objects.equals(msg, "接口管理")) {
+                    web.loadUrl("file:///android_asset/interface.html");
 
-                    web.loadUrl("file:///android_asset/Api.html");
+
                     ImageView add = findViewById(R.id.add_more);
                     add.setVisibility(View.VISIBLE);
                     add.setOnClickListener(new View.OnClickListener() {
@@ -4797,8 +4922,6 @@ public class IndexActivity extends FragmentActivity {
                             setApi_Dialog();
                         }
                     });
-
-
                 } else if (Objects.equals(msg, "广告拦截")) {
                     adblock.setVisibility(View.VISIBLE);
                     File folder = IndexActivity.this.getExternalFilesDir("Adblock");
@@ -4859,7 +4982,6 @@ public class IndexActivity extends FragmentActivity {
     }
 
     private void setApi_Dialog() {
-
         LayoutInflater inflater = LayoutInflater.from(IndexActivity.this);
         View view = LayoutInflater.from(this).inflate(R.layout.api_dialog, null);
         // 对话框
@@ -4925,6 +5047,85 @@ public class IndexActivity extends FragmentActivity {
         dialog.show();
     }
 
+
+    private void Set_api(String t,String url,String l) {
+        LayoutInflater inflater = LayoutInflater.from(IndexActivity.this);
+        View view = LayoutInflater.from(this).inflate(R.layout.api_dialog, null);
+        // 对话框
+        final Dialog dialog = new Dialog(IndexActivity.this);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.show();
+        // 设置宽度为屏幕的宽度
+        WindowManager windowManager = getWindowManager();
+        Display display = windowManager.getDefaultDisplay();
+        WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
+        lp.width = display.getWidth()-150; // 设置宽度
+        dialog.getWindow().setAttributes(lp);
+        dialog.getWindow().setContentView(view);
+
+        TextView sure = view.findViewById(R.id.sure);
+        TextView cancel = view.findViewById(R.id.cancel);
+        TextView api_title=view.findViewById(R.id.api_title);
+        TextView api_delete=view.findViewById(R.id.api_delete);
+        api_title.setText("修改接口");
+        EditText api = view.findViewById(R.id.api);
+        api.setText(url);
+        EditText title = view.findViewById(R.id.title);
+        title.setText(t);
+        EditText label = view.findViewById(R.id.label);
+        label.setText(l);
+        dialog.setContentView(view);
+        api_delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SQLiteOpenHelper dbHelper = new Database(IndexActivity.this, "Database", null, 1);
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                db.delete("Api", "title=?", new String[]{t});
+                db.close();
+                ToastUtil.Toast(IndexActivity.this, "删除成功");
+                dialog.dismiss();
+                web.reload();
+            }
+        });
+        sure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SQLiteOpenHelper dbHelper = new Database(IndexActivity.this, "Database", null, 1);
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                if (db.isOpen()) {
+                    Cursor cursorr = db.rawQuery("SELECT title FROM Api WHERE title='" + t+ "'", null);
+                    if (cursorr.getCount() > 0) {
+                            if (api.getText().toString().equals("") || title.getText().toString().equals("") || label.getText().toString().equals("")) {
+                                ToastUtil.Toast(IndexActivity.this, "请不要为空");
+                                dialog.dismiss();
+                            } else {
+                                try{
+                                    String sql = "  update  Api set title=\"" + title.getText().toString() +"\",content=\""+api.getText().toString()+"\",label=\""+label.getText().toString()+"\""+"where title=\""+t+"\"";
+                                    db.execSQL(sql);
+                                    ToastUtil.Toast(IndexActivity.this, "修改成功");
+                                    dialog.dismiss();
+                                    web.reload();
+                                }catch (Exception e)
+                                {
+                                }
+                            }
+                    }
+                }
+
+
+            }
+        });
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+
     @JavascriptInterface
     public String call_general(String msg) {
         runOnUiThread(new Runnable() {
@@ -4987,8 +5188,6 @@ public class IndexActivity extends FragmentActivity {
 
                         }
                     }
-
-
                 } else if (Objects.equals(msg, "浏览器标识")) {
                     type = "浏览器标识";
                     more_text.setText("浏览器标识");
@@ -5014,9 +5213,7 @@ public class IndexActivity extends FragmentActivity {
                             moreAdpter.setOnItemClickListener(new MoreAdpter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(View view, int position, String name) {
-
                                     TextView tv = view.findViewById(R.id.user);
-
                                     if (tv.getText().toString().equals("○")) {
                                         tv.setText("●");
                                         SharedPreferences.Editor sharedPreferences = getSharedPreferences("UserAgent", MODE_PRIVATE).edit();
@@ -5076,9 +5273,7 @@ public class IndexActivity extends FragmentActivity {
                                         SharedPreferences.Editor sharedPreferences = getSharedPreferences("Homepage", MODE_PRIVATE).edit();
                                         sharedPreferences.putString("Homepage", name);
                                         sharedPreferences.commit();
-
                                         RecyclerView.LayoutManager manager = more_list.getLayoutManager();
-
                                         for (int i = 0; i < moreAdpter.getItemCount(); i++) {
                                             View itemView = manager.getChildAt(i);
                                             TextView t = itemView.findViewById(R.id.user);
@@ -5097,21 +5292,16 @@ public class IndexActivity extends FragmentActivity {
                                 public void onItemClick(View view, int position, String name) {
                                    String content=query_homepage_name(name);
                                    More_Menu(type,name,content);
-
-
                                 }
                             });
-
-
-
                         }
                     }
                 } else if (Objects.equals(msg, "大小设置")) {
-
                     size_seekbar = findViewById(R.id.size_seekbar);
                     size_progress = findViewById(R.id.size_progress);
                     int WebFontSize = getSharedPreferences("WebFontSize", MODE_PRIVATE).getInt("WebFontSize", 20);
                     size_progress.setText("字体大小：" + WebFontSize);
+                    size_seekbar.setProgress(WebFontSize);
                     WebView websize = findViewById(R.id.size_web);
                     websize.loadData("落霞与孤鹜齐飞，秋水共长天一色", "text/html", "UTF-8");
                     websize.getSettings().setDefaultFontSize(WebFontSize);
@@ -5139,14 +5329,15 @@ public class IndexActivity extends FragmentActivity {
                         public void onStopTrackingTouch(SeekBar seekBar) {
                         }
                     });
-
-                    // setSize_Dialog();
                     SizeSettings.setVisibility(View.VISIBLE);
                 } else if (Objects.equals(msg, "下载目录")) {
                     setPath_Dialog();
                 } else if (Objects.equals(msg, "下载方式")) {
-                    Download_Menu();
-                } else if (Objects.equals(msg, "网站设定")) {
+                    Download_Menu("DownloadBy","内置下载器","ADM");
+                }else if (Objects.equals(msg, "网页切换方式")) {
+                    Download_Menu("ViewPager","无","动画");
+                }
+                else if (Objects.equals(msg, "网站设定")) {
                     setting_img = findViewById(R.id.setting_img);
                     setting_apk = findViewById(R.id.setting_apk);
                     setting_cookies = findViewById(R.id.setting_cookies);
@@ -5342,7 +5533,6 @@ public class IndexActivity extends FragmentActivity {
                         }
                     });
                     webSettings.setVisibility(View.VISIBLE);
-
                 } else if (Objects.equals(msg, "导入书签数据")) {
                     Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                     intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -5364,14 +5554,49 @@ public class IndexActivity extends FragmentActivity {
             @Override
             public void run() {
                 if (Objects.equals(msg, "设置背景壁纸")) {
+                   // Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                   // intent.setType("image/*");
+                    //选择图片
+                    //intent.addCategory(Intent.CATEGORY_OPENABLE);
+                   // startActivityForResult(intent, 100);
                     String[] mPermissionList = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
                     ActivityCompat.requestPermissions(IndexActivity.this, mPermissionList, 100);
+
                 } else if (Objects.equals(msg, "设置顶部Log")) {
-                    DIYDialog("设置顶部Log", 1);
+                    DIYDialog("设置顶部Log：Log为头像链接", 1);
                 } else if (Objects.equals(msg, "设置顶部文字")) {
                     DIYDialog("设置顶部文字", 2);
                 } else if (Objects.equals(msg, "自定义顶部Css")) {
                     DIYDialog("自定义顶部Css", 3);
+                }else if (Objects.equals(msg, "恢复默认空白背景"))
+                {
+                    Boolean img = getSharedPreferences("data", MODE_PRIVATE).edit().putString("indexBackground","空白背景").commit();
+                    if(img)
+                    {
+                        ToastUtil.Toast(IndexActivity.this,"恢复成功");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                index.setBackgroundColor(getResources().getColor(R.color.white));
+                                goBack.setColorFilter(getResources().getColor(R.color.black));
+                                goForward.setColorFilter(getResources().getColor(R.color.black));
+                                Home.setColorFilter(getResources().getColor(R.color.black));
+                                More.setColorFilter(getResources().getColor(R.color.black));
+                                add.setColorFilter(getResources().getColor(R.color.black));
+                                search.setColorFilter(getResources().getColor(R.color.black));
+                                find.setColorFilter(getResources().getColor(R.color.black));
+                                api.setColorFilter(getResources().getColor(R.color.black));
+                                webtitle.setTextColor(getResources().getColor(R.color.black));
+                                table_text.setTextColor(getResources().getColor(R.color.black));
+                                pscode.setColorFilter(getResources().getColor(R.color.black));
+
+                            }
+                        });
+
+                    }else
+                    {
+                        ToastUtil.Toast(IndexActivity.this,"恢复失败");
+                    }
                 }
 
             }
@@ -5388,22 +5613,33 @@ public class IndexActivity extends FragmentActivity {
     /**
      * 后退
      */
+
     private void goBack() {
         if (itemlistViewAll.get(countlist.get(count)).size() > 1 && itempager[countlist.get(count)].getCurrentItem() != 0) {
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).stopLoading();
                     itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).onPause();
-                    ps.setWebProgress(100);
-                    itempager[countlist.get(count)].setCurrentItem(itempager[countlist.get(count)].getCurrentItem() - 1, false);
+                    itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).stopLoading();
+                    //itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).pauseTimers();
+                    SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
+                    String home = sharedPreferences.getString("ViewPager","无");
+                    if (Objects.equals(home, "无"))
+                    {
+                        itempager[countlist.get(count)].setCurrentItem(itempager[countlist.get(count)].getCurrentItem() - 1, false);
+                    }else
+                    {
+                        itempager[countlist.get(count)].setCurrentItem(itempager[countlist.get(count)].getCurrentItem() - 1, true);
+                    }
+
+                   // ps.setWebProgress(100);
                     try{
                         updateStatusColor(itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()));
                     }catch (Exception e)
                     {
                         Log.w("Error updating","error:"+e);
                     }
-
                     webtitle.setText(WebPageTitleAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()));
 
             if (itempager[countlist.get(count)].getCurrentItem() > 0) {
@@ -5503,25 +5739,30 @@ public class IndexActivity extends FragmentActivity {
             @Override
             public void run() {
                 itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).onPause();
-                itempager[countlist.get(count)].setCurrentItem(itempager[countlist.get(count)].getCurrentItem() + 1, false);
+                SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
+                String home = sharedPreferences.getString("ViewPager","无");
+                if (Objects.equals(home, "无")) {
+                    itempager[countlist.get(count)].setCurrentItem(itempager[countlist.get(count)].getCurrentItem() + 1, false);
+                }else
+                {
+                    itempager[countlist.get(count)].setCurrentItem(itempager[countlist.get(count)].getCurrentItem() + 1, true);
+                }
                 webtitle.setText(WebPageTitleAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()));
                 try{
                     updateStatusColor(itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()));
                 }catch (Exception e)
                 {
-                    Log.w("Error updating","error:"+e);
                 }
-
             }
         });
         itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).onResume();
         listview = itempager[countlist.get(count)].getCurrentItem();
     }
 
+    @SuppressLint("Range")
     private void Dialog() {
         ScriptStoreSQLite scriptStore = new ScriptStoreSQLite(IndexActivity.this);
         scriptStore.open();
-        //addWeb("http://baidu.com");
         this.scriptStore = scriptStore;
         scripts = scriptStore.getAll();
         arrayList = new ArrayList<HashMap<String, Object>>();
@@ -5546,7 +5787,6 @@ public class IndexActivity extends FragmentActivity {
             arrayList.add(js);
 
         }
-
         BottomSheetDialog dialog = new BottomSheetDialog(this, R.style.MyBottomSheetDialog);
         View view = LayoutInflater.from(this).inflate(R.layout.index_dialog, null);
         Window window = dialog.getWindow();
@@ -5563,6 +5803,45 @@ public class IndexActivity extends FragmentActivity {
         (resource) = view.findViewById(R.id.resource);
         (useragent) = view.findViewById(R.id.useragent);
         (save_web) = view.findViewById(R.id.save_web);
+        (exit)=view.findViewById(R.id.exit);
+        (refresh)=view.findViewById(R.id.refresh);
+        exit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+                Util.clearWebViewCache(IndexActivity.this);
+            }
+        });
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+                itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).reload();
+            }
+        });
+        ImageView trace=view.findViewById(R.id.trace);
+        ImageView isnight=view.findViewById(R.id.isnight);
+        TextView trace_txt=view.findViewById(R.id.trace_txt);
+        TextView night_txt=view.findViewById(R.id.night_txt);
+        String is = getSharedPreferences("data", MODE_PRIVATE).getString("trace", "关闭");
+        if(Objects.equals(is, "关闭"))
+        {
+            trace.setColorFilter(getResources().getColor(R.color.black));
+            trace_txt.setTextColor(getResources().getColor(R.color.black));
+        }else
+        {
+            trace.setColorFilter(getResources().getColor(R.color.pink));
+            trace_txt.setTextColor(getResources().getColor(R.color.pink));
+        }
+        if(isNight)
+        {
+            isnight.setColorFilter(getResources().getColor(R.color.pink));
+            night_txt.setTextColor(getResources().getColor(R.color.pink));
+        }else
+        {
+            isnight.setColorFilter(getResources().getColor(R.color.black));
+            night_txt.setTextColor(getResources().getColor(R.color.black));
+        }
         person.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -5573,7 +5852,6 @@ public class IndexActivity extends FragmentActivity {
                     sendIntent.setAction(Intent.ACTION_SEND);
                     sendIntent.putExtra(Intent.EXTRA_TEXT, itemlistViewAll.get(countlist.get(count)).get(listview).getUrl());
                 }
-
             }
         });
         save_web.setOnClickListener(new View.OnClickListener() {
@@ -5584,12 +5862,13 @@ public class IndexActivity extends FragmentActivity {
 
                     itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).saveWebArchive(folder.getAbsolutePath() + "/" + webtitle.getText().toString() + ".mht");
                     ToastUtil.Toast(IndexActivity.this, "保存成功");
+                    dialog.cancel();
                 } else {
                     ToastUtil.Toast(IndexActivity.this, "当前页面不允许操作");
+                    dialog.cancel();
                 }
             }
         });
-
         useragent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -5599,8 +5878,6 @@ public class IndexActivity extends FragmentActivity {
                 ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
                 SQLiteOpenHelper dbHelper = new Database(IndexActivity.this, "Database", null, 1);
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
-                //Cursor cursor = db.rawQuery("select * from bookmarkDB", null);
-                //查询语句也可以这样写
                 Cursor cursor = db.query("UserAgent", null, null, null, null, null, "id desc");
                 SharedPreferences sharedPreferences = getSharedPreferences("UserAgent", MODE_PRIVATE);
                 String ua = sharedPreferences.getString("UserAgent", "手机");
@@ -5613,7 +5890,6 @@ public class IndexActivity extends FragmentActivity {
                         HashMap<String, Object> map = new HashMap<String, Object>();
                         map.put("title", get_title);
                         map.put("UserAgent", ua);
-                        // map.put("is",)
                         list.add(map);
                         moreAdpter = new MoreAdpter(list, "useragent");
                         more_list.setAdapter(moreAdpter);
@@ -5623,12 +5899,8 @@ public class IndexActivity extends FragmentActivity {
                                 TextView tv = view.findViewById(R.id.user);
                                 if (tv.getText().toString().equals("○")) {
                                     tv.setText("●");
-                                    SharedPreferences.Editor sharedPreferences = getSharedPreferences("UserAgent", MODE_PRIVATE).edit();
-                                    sharedPreferences.putString("UserAgent", name);
-                                    sharedPreferences.commit();
-                                    // recyclerView -  RecyclerView 控件变量名
+                                    getSharedPreferences("UserAgent", MODE_PRIVATE).edit().putString("UserAgent", name).commit();
                                     RecyclerView.LayoutManager manager = more_list.getLayoutManager();
-                                    // 方式一  position : 你需要获取的对应View的索引值即 index
                                     for (int i = 0; i < moreAdpter.getItemCount(); i++) {
                                         View itemView = manager.getChildAt(i);
                                         TextView t = itemView.findViewById(R.id.user);
@@ -5641,8 +5913,6 @@ public class IndexActivity extends FragmentActivity {
                                 }
                             }
                         });
-
-
                     }
                 }
             }
@@ -5650,17 +5920,19 @@ public class IndexActivity extends FragmentActivity {
         resource.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (listview > 0) {
-                    String js = "javascript:function inspect(){var videos=document.getElementsByTagName('video');var array_video=new Array();for(var i=0;i<videos.length;i++){array_video.push(videos[i].src);}var array_iframe=new Array();var iframes=document.getElementsByTagName('iframe');for(var i=0;i<iframes.length;i++){array_iframe.push(iframes[i].src);}var array_img=new Array();var imgs=document.getElementsByTagName('img');for(var i=0;i<imgs.length;i++){array_img.push(imgs[i].src);}return{array_video,array_iframe,array_img}}";
-                    itemlistViewAll.get(countlist.get(count)).get(listview).loadUrl(js);
-                    itemlistViewAll.get(countlist.get(count)).get(listview).evaluateJavascript("javascript:inspect()", new ValueCallback<String>() {
-                        @Override
-                        public void onReceiveValue(String value) {
-                            String html = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'/><title>资源探查</title><style>h1{text-align:center;}a{text-decoration:none;}img{max-width:100%;}</style></head><body><h1>视频</h1><div id='div_video'></div><h1>图片</h1><div id='div_img'></div></body><script>var div_video=document.getElementById('div_video');var json=eval((" + value + "));var videos=json.array_video;for(var i=0; i<videos.length; i++){var video=document.createElement('video');video.src=videos[i];video.controls='controls';div_video.append(video);}var iframes=json.array_iframe;for(var i=0; i<iframes.length; i++){var p = document.createElement('p');var a=document.createElement('a');a.textContent=iframes[i];a.href=iframes[i];a.target='_blank';p.append(a);div_iframe.append(p);}var imgs=json.array_img;for(var i=0; i<imgs.length; i++){var img=document.createElement('img');img.src=imgs[i];div_img.append(img);}</script></html>";
-                            itemlistViewAll.get(countlist.get(count)).get(listview).loadData(html, "text/html; charset=UTF-8", null);
-                        }
-                    });
-                } else {
+                if(resource_list.getVisibility() == View.GONE)
+                {
+                    resource_list.setVisibility(View.VISIBLE);
+                    resource_list.setAdapter(mSimpleAdapter);//为ListView绑定适配器
+
+                }else
+                {
+                    resource_list.setVisibility(View.GONE);
+                }
+                dialog.cancel();
+                if(resources==null||resources.size()==0)
+                {
+                    ToastUtil.Toast(IndexActivity.this,"没有嗅探到资源");
                 }
             }
         });
@@ -5709,7 +5981,6 @@ public class IndexActivity extends FragmentActivity {
                     Addbookmark_Dialog(webtitle.getText().toString(), itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).getUrl());
                     dialog.cancel();
                 }
-
             }
         });
         set.setOnClickListener(new View.OnClickListener() {
@@ -5746,9 +6017,7 @@ public class IndexActivity extends FragmentActivity {
                         });
                     }
                 }
-
             }
-
         });
         source.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -5791,7 +6060,6 @@ public class IndexActivity extends FragmentActivity {
             }
         });
         person.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
                 dialog.cancel();
@@ -5807,11 +6075,9 @@ public class IndexActivity extends FragmentActivity {
 
             }
         });
-
         dialog.setContentView(view);
         dialog.show();
     }
-
     //改写物理按键——返回的逻辑
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -5833,7 +6099,36 @@ public class IndexActivity extends FragmentActivity {
                     }
                 });
                 return true;
-            } else if (edit_script.getVisibility() == View.VISIBLE) {
+            } else if (view_log.getVisibility() == View.VISIBLE) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        viewpager.setVisibility(View.VISIBLE);
+                        view_log.setVisibility(View.GONE);
+                    }
+                });
+                return true;
+            } else if (resource_list.getVisibility() == View.VISIBLE) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        resource_list.setVisibility(View.GONE);
+                    }
+                });
+                return true;
+            }
+            else if (view_video.getVisibility() == View.VISIBLE) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        JzvdStd.releaseAllVideos();//在销毁活动时，关闭饺子视频
+                        viewpager.setVisibility(View.VISIBLE);
+                        view_video.setVisibility(View.GONE);
+                    }
+                });
+                return true;
+            }
+            else if (edit_script.getVisibility() == View.VISIBLE) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -5870,6 +6165,8 @@ public class IndexActivity extends FragmentActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        WebView web = findViewById(R.id.image_view);
+                        web.loadUrl("");
                         view_image.setVisibility(View.GONE);
                     }
                 });
@@ -5887,7 +6184,6 @@ public class IndexActivity extends FragmentActivity {
                     @Override
                     public void run() {
                         QR.setVisibility(View.GONE);
-
                     }
                 });
                 return true;
@@ -5932,18 +6228,31 @@ public class IndexActivity extends FragmentActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).stopLoading();
+                        /*
+                        SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
+                        String home = sharedPreferences.getString("ViewPager","无");
+                        if (Objects.equals(home, "无")) {
+                            itempager[countlist.get(count)].setCurrentItem(itempager[countlist.get(count)].getCurrentItem() - 1, false);
+                        }else
+                        {
+                            itempager[countlist.get(count)].setCurrentItem(itempager[countlist.get(count)].getCurrentItem() - 1, true);
+                        }
+
+
+                         */
+
+
                         itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).onPause();
+                        itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).stopLoading();
                         ps.setWebProgress(100);
                         itempager[countlist.get(count)].setCurrentItem(itempager[countlist.get(count)].getCurrentItem() - 1, false);
+                        webtitle.setText(WebPageTitleAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()));
                         try{
                             updateStatusColor(itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()));
                         }catch (Exception e)
                         {
-                            Log.w("Error updating","error:"+e);
-                        }
-                        webtitle.setText(WebPageTitleAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()));
 
+                        }
                 if (itempager[countlist.get(count)].getCurrentItem() > 0) {
                     itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).onResume();
                     listview = listview - 1;
@@ -5951,6 +6260,7 @@ public class IndexActivity extends FragmentActivity {
                     itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).onResume();
                     listview = 0;
                     viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
+                    itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).setBackgroundColor(0);
                     ps.setWebProgress(100);
                     Util.clearWebViewCache(IndexActivity.this);
                 }
@@ -6029,7 +6339,7 @@ public class IndexActivity extends FragmentActivity {
                     updateStatusColor(itemlistViewAll.get(countlist.get(count)).get(listview));
                 }catch (Exception e)
                 {
-                    Log.w("Error updating","error:"+e);
+
                 }
                 webtitle.setText(title);
                 return true;
@@ -6050,9 +6360,7 @@ public class IndexActivity extends FragmentActivity {
                                     e.printStackTrace();
                                 }
                             }
-
                         }).start();
-
                     } else {
                         finish();
                         Util.clearWebViewCache(IndexActivity.this);
@@ -6061,12 +6369,9 @@ public class IndexActivity extends FragmentActivity {
                 } else {
                     return super.onKeyDown(keyCode, event);
                 }
-
-
             }
         }
         return super.onKeyDown(keyCode, event);
-
     }
 
     /**
@@ -6106,7 +6411,6 @@ public class IndexActivity extends FragmentActivity {
                     full.setVisibility(View.GONE);
                     pscode.setVisibility(View.VISIBLE);
                     top.setBackgroundColor(Color.TRANSPARENT);
-
                     String indexBackground = getSharedPreferences("data", MODE_PRIVATE).getString("indexBackground", "空白背景");
                     if (itempager[countlist.get(count)].getCurrentItem() == 0) {
                         initView();
@@ -6567,12 +6871,10 @@ public class IndexActivity extends FragmentActivity {
                             startActivityForResult(intent, 666);
                         }
                     }
-
                 }
                 fileManager.open(info.name, info.path);
             }
         }
-
         @Override
         public boolean onLongClick(View view) {
             final int position = getAdapterPosition();
@@ -6608,7 +6910,6 @@ public class IndexActivity extends FragmentActivity {
                                 startActivityForResult(intent, 666);
                             }
                         }
-
                     }
                     itemLongClickedPopWindow.dismiss();
                     fileManager.open(info.name, info.path);
@@ -6628,7 +6929,6 @@ public class IndexActivity extends FragmentActivity {
                         DownloadProvider d=new DownloadProvider(IndexActivity.this);
                         d.delete(info);
                     }
-
                     IndexActivity.DownloadedAdapter.notifyItemRemoved(position);
                     itemLongClickedPopWindow.dismiss();
                 }
@@ -6636,16 +6936,13 @@ public class IndexActivity extends FragmentActivity {
             return false;
         }
     }
+
 }
-
-
 class ScriptBrowserWebViewClientGm extends WebViewClientGm {
-
     private final IndexActivity indexActivity;
-    String Overrideurl;
-    boolean if_load, loading;
-    String result;
+    boolean if_load;
     int count;
+    Bitmap icon;
     public ScriptBrowserWebViewClientGm(ScriptStore scriptStore, String jsBridgeName, String secret, IndexActivity indexActivity) {
         super(scriptStore, jsBridgeName, secret);
         this.indexActivity = indexActivity;
@@ -6657,28 +6954,25 @@ class ScriptBrowserWebViewClientGm extends WebViewClientGm {
 
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        WebResourceResponse response = null;
-
-        if(request.getUrl().toString().endsWith(".png")){
-            try {
-                final PipedOutputStream out = new PipedOutputStream();
-                PipedInputStream in = new PipedInputStream(out);
-                //out.write(HttpUtil.sendGet(request.getUrl().toString()));
-                response = new WebResourceResponse("image/png", "UTF-8", in);
-                Log.w("mmm",""+in);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
         try {
             String mUrl = request.getUrl().toString();
+            final String extension = MimeTypeMap.getFileExtensionFromUrl(mUrl);
+            final String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+            Log.w("mmm",""+mimeType);
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            if(Objects.equals(mimeType, "video/mp4"))
+            {
+                map.put("title", "嗅探到视频资源");
+                map.put("content",mUrl);
+                indexActivity.listItem.add(map);
+            }
             HashMap<String, String> params = new HashMap<String, String>();
             params.put("url", mUrl);
-            if (mUrl.endsWith(".js")) {
+            if (mUrl.endsWith(".js")||Objects.equals(mimeType, "application/javascript")) {
                 params.put("type", "JavaScript文件");
-            } else if (mUrl.endsWith(".mp4")) {
+            } else if (mUrl.endsWith(".mp4")||Objects.equals(mimeType, "video/mp4")) {
                 params.put("type", "视频文件");
-            } else if (mUrl.endsWith(".png")) {
+            } else if (mUrl.endsWith(".png")||Objects.equals(mimeType, "image/gif")||Objects.equals(mimeType, "image/x-icon")||Objects.equals(mimeType, "image/webp")||Objects.equals(mimeType, "image/jpeg")||Objects.equals(mimeType, "image/png")||Objects.equals(mimeType, "image/svg+xml")) {
                 params.put("type", "图片文件");
             } else if (mUrl.endsWith(".jpg")) {
                 params.put("type", "图片文件");
@@ -6688,16 +6982,18 @@ class ScriptBrowserWebViewClientGm extends WebViewClientGm {
                 params.put("type", "图片文件");
             } else if (mUrl.endsWith(".mp3")) {
                 params.put("type", "音频文件");
-            } else if (mUrl.endsWith(".css")) {
+            } else if (mUrl.endsWith(".css")||Objects.equals(mimeType, "text/css")) {
                 params.put("type", "CSS文件");
             } else {
                 params.put("type", "其他文件");
             }
             IndexActivity.resources.add(params);
-
+            IndexActivity.mySimpleAdapter.notifyDataSetChanged();
         } catch (Exception e) {
             return super.shouldInterceptRequest(view, request);
         }
+
+
         return super.shouldInterceptRequest(view, request);
     }
 
@@ -6714,7 +7010,6 @@ class ScriptBrowserWebViewClientGm extends WebViewClientGm {
                         indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).onPause();
                         indexActivity.addWebView(request.getUrl().toString());
                         IndexActivity.touch = false;
-
                     } else {
                         for (int i = indexActivity.WebPageAll.get(IndexActivity.countlist.get(IndexActivity.count)).size() - 1; i > IndexActivity.itempager[IndexActivity.countlist.get(IndexActivity.count)].getCurrentItem(); i--) {
                             indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(i).destroy();
@@ -6737,9 +7032,6 @@ class ScriptBrowserWebViewClientGm extends WebViewClientGm {
             if (Objects.equals(indexActivity.Webapk, "询问")) {
                 indexActivity.toast_view.setVisibility(View.VISIBLE);
                 indexActivity.toast_content.setText("网站请求打开其他应用？");
-                RelativeLayout.LayoutParams paramsss = (RelativeLayout.LayoutParams) indexActivity.toast_view.getLayoutParams();
-                paramsss.bottomMargin = IndexActivity.getNavBarHeight(indexActivity) + SizeUtil.dp2px(indexActivity, 45);
-                indexActivity.toast_view.setLayoutParams(paramsss);
                 indexActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -6821,65 +7113,13 @@ class ScriptBrowserWebViewClientGm extends WebViewClientGm {
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         super.onPageStarted(view, url, favicon);
-        if_load = true;
-        indexActivity.checkDownload(url);
-        if (indexActivity.isNight) {
-            indexActivity.mWebView[IndexActivity.count].post(new Runnable() {
-                @Override
-                public void run() {
-                    String night = "(function () { class ChangeBackground { constructor() { this.init(); }; init() { this.addStyle(`html, body {background-color: #272626 !important;}*{color: #CCD1D9 !important;box-shadow: none !important;}*:after, *:before {border-color: #CCD1D9 !important;color: #CCD1D9 !important;box-shadow: none !important;background-color: transparent !important;}a, a > *{color: #ffffff !important;}[data-change-border-color][data-change-border-color-important] {border-color: #1e1e1e !important;}[data-change-background-color][data-change-background-color-important] {background-color: #272626 !important;}`); this.selectAllNodes(node => { if (node.nodeType !== 1) { return; }; const style = window.getComputedStyle(node, null); const whiteList = ['rgba(0, 0, 0, 0)', 'transparent']; const backgroundColor = style.getPropertyValue('background-color'); const borderColor = style.getPropertyValue('border-color'); if (whiteList.indexOf(backgroundColor) < 0) { if (this.isWhiteToBlack(backgroundColor)) { node.dataset.changeBackgroundColor = ''; node.dataset.changeBackgroundColorImportant = ''; } else { delete node.dataset.changeBackgroundColor; delete node.dataset.changeBackgroundColorImportant; }; }; if (whiteList.indexOf(borderColor) < 0) { if (this.isWhiteToBlack(borderColor)) { node.dataset.changeBorderColor = ''; node.dataset.changeBorderColorImportant = ''; } else { delete node.dataset.changeBorderColor; delete node.dataset.changeBorderColorImportant; }; }; if (borderColor.indexOf('rgb(255, 255, 255)') >= 0) { delete node.dataset.changeBorderColor; delete node.dataset.changeBorderColorImportant; node.style.borderColor = 'transparent'; }; }); }; addStyle(style = '') { const styleElm = document.createElement('style'); styleElm.innerHTML = style; document.head.appendChild(styleElm); }; isWhiteToBlack(colorStr = '') { let hasWhiteToBlack = false; const colorArr = colorStr.match(/rgb.+?\\)/g); if (!colorArr || colorArr.length === 0) { return true; }; colorArr.forEach(color => { const reg = /rgb[a]*?\\(([0-9]+),.*?([0-9]+),.*?([0-9]+).*?\\)/g; const result = reg.exec(color); const red = result[1]; const green = result[2]; const blue = result[3]; const deviation = 20; const max = Math.max(red, green, blue); const min = Math.min(red, green, blue); if (max - min <= deviation) { hasWhiteToBlack = true; }; }); return hasWhiteToBlack; }; selectAllNodes(callback = () => { }) { const allNodes = document.querySelectorAll('*'); Array.from(allNodes, node => { callback(node); }); this.observe({ targetNode: document.documentElement, config: { attributes: false }, callback(mutations, observer) { const allNodes = document.querySelectorAll('*'); Array.from(allNodes, node => { callback(node); }); } }); }; observe({ targetNode, config = {}, callback = () => { } }) { if (!targetNode) { return; }; config = Object.assign({ attributes: true, childList: true, subtree: true }, config); const observer = new MutationObserver(callback); observer.observe(targetNode, config); }; }; new ChangeBackground(); })();\n";
-                    if (IndexActivity.itempager[IndexActivity.countlist.get(IndexActivity.count)].getCurrentItem() > 0) {
-                        indexActivity.itemlistViewAll.get(IndexActivity.count).get(indexActivity.listview).evaluateJavascript(night, null);
-                    }
-                    indexActivity.mWebView[IndexActivity.count].evaluateJavascript(night, null);
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onPageFinished(WebView view, String url) {
-        super.onPageFinished(view, url);
-        String is = indexActivity.getSharedPreferences("data", MODE_PRIVATE).getString("trace", "关闭");
-        if (if_load) {
-            if (url.startsWith("file://")) {
-
-            } else {
-                if (Objects.equals(is, "开启")) {
-                } else {
-                    if(Objects.equals(view.copyBackForwardList().getCurrentItem().getTitle(), "") ||view.copyBackForwardList().getCurrentItem().getTitle()==null)
-                    {
-                        indexActivity.add_history("网页无法打开",view.copyBackForwardList().getCurrentItem().getUrl());
-                    }else
-                    {
-                        indexActivity.add_history(view.copyBackForwardList().getCurrentItem().getTitle(),view.copyBackForwardList().getCurrentItem().getUrl());
-                    }
-
-                    if_load = false;
-                }
-            }
-        }
+        indexActivity.resources.clear();
         if (Objects.equals(url, "file:///android_asset/index.html")) {
 
         } else {
-            try{  indexActivity.updateStatusColor(view);}catch (Exception e){}
+            indexActivity.updateStatusColor(view);
         }
-
-        if (indexActivity.isTool) {
-            indexActivity.itemlistViewAll.get(IndexActivity.count).get(indexActivity.listview).post(new Runnable() {
-                @Override
-                public void run() {
-                    String tool = "javascript:(function () { var script = document.createElement('script'); script.src=\"//cdn.jsdelivr.net/npm/eruda\"; document.body.appendChild(script); script.onload = function () { eruda.init() } })();";
-                    if (IndexActivity.itempager[IndexActivity.countlist.get(IndexActivity.count)].getCurrentItem() > 0) {
-                        indexActivity.itemlistViewAll.get(IndexActivity.count).get(indexActivity.listview).evaluateJavascript(tool, null);
-                    }
-
-                }
-            });
-        }
-
         count = 0;
-
         CookieManager cookieManager = CookieManager.getInstance();
         String CookieStr = cookieManager.getCookie(url);
         IndexActivity.Cookie = CookieStr;
@@ -6913,7 +7153,6 @@ class ScriptBrowserWebViewClientGm extends WebViewClientGm {
                 map.put("content", get_content);
                 listb.add(map);
             }
-
         }
 
         indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).post(new Runnable() {
@@ -6966,20 +7205,183 @@ class ScriptBrowserWebViewClientGm extends WebViewClientGm {
         } else {
 
         }
-
+        indexActivity.listItem.clear();
+        indexActivity.mSimpleAdapter.notifyDataSetChanged();
+        if_load = true;
+        indexActivity.checkDownload(url);
+        if (indexActivity.isNight) {
+            indexActivity.mWebView[IndexActivity.count].post(new Runnable() {
+                @Override
+                public void run() {
+                    String night = "(function () { class ChangeBackground { constructor() { this.init(); }; init() { this.addStyle(`html, body {background-color: #272626 !important;}*{color: #CCD1D9 !important;box-shadow: none !important;}*:after, *:before {border-color: #CCD1D9 !important;color: #CCD1D9 !important;box-shadow: none !important;background-color: transparent !important;}a, a > *{color: #ffffff !important;}[data-change-border-color][data-change-border-color-important] {border-color: #1e1e1e !important;}[data-change-background-color][data-change-background-color-important] {background-color: #272626 !important;}`); this.selectAllNodes(node => { if (node.nodeType !== 1) { return; }; const style = window.getComputedStyle(node, null); const whiteList = ['rgba(0, 0, 0, 0)', 'transparent']; const backgroundColor = style.getPropertyValue('background-color'); const borderColor = style.getPropertyValue('border-color'); if (whiteList.indexOf(backgroundColor) < 0) { if (this.isWhiteToBlack(backgroundColor)) { node.dataset.changeBackgroundColor = ''; node.dataset.changeBackgroundColorImportant = ''; } else { delete node.dataset.changeBackgroundColor; delete node.dataset.changeBackgroundColorImportant; }; }; if (whiteList.indexOf(borderColor) < 0) { if (this.isWhiteToBlack(borderColor)) { node.dataset.changeBorderColor = ''; node.dataset.changeBorderColorImportant = ''; } else { delete node.dataset.changeBorderColor; delete node.dataset.changeBorderColorImportant; }; }; if (borderColor.indexOf('rgb(255, 255, 255)') >= 0) { delete node.dataset.changeBorderColor; delete node.dataset.changeBorderColorImportant; node.style.borderColor = 'transparent'; }; }); }; addStyle(style = '') { const styleElm = document.createElement('style'); styleElm.innerHTML = style; document.head.appendChild(styleElm); }; isWhiteToBlack(colorStr = '') { let hasWhiteToBlack = false; const colorArr = colorStr.match(/rgb.+?\\)/g); if (!colorArr || colorArr.length === 0) { return true; }; colorArr.forEach(color => { const reg = /rgb[a]*?\\(([0-9]+),.*?([0-9]+),.*?([0-9]+).*?\\)/g; const result = reg.exec(color); const red = result[1]; const green = result[2]; const blue = result[3]; const deviation = 20; const max = Math.max(red, green, blue); const min = Math.min(red, green, blue); if (max - min <= deviation) { hasWhiteToBlack = true; }; }); return hasWhiteToBlack; }; selectAllNodes(callback = () => { }) { const allNodes = document.querySelectorAll('*'); Array.from(allNodes, node => { callback(node); }); this.observe({ targetNode: document.documentElement, config: { attributes: false }, callback(mutations, observer) { const allNodes = document.querySelectorAll('*'); Array.from(allNodes, node => { callback(node); }); } }); }; observe({ targetNode, config = {}, callback = () => { } }) { if (!targetNode) { return; }; config = Object.assign({ attributes: true, childList: true, subtree: true }, config); const observer = new MutationObserver(callback); observer.observe(targetNode, config); }; }; new ChangeBackground(); })();\n";
+                    if (IndexActivity.itempager[IndexActivity.countlist.get(IndexActivity.count)].getCurrentItem() > 0) {
+                        indexActivity.itemlistViewAll.get(IndexActivity.count).get(indexActivity.listview).evaluateJavascript(night, null);
+                    }
+                    indexActivity.mWebView[IndexActivity.count].evaluateJavascript(night, null);
+                }
+            });
+        }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-        super.onReceivedError(view, request, error);
+    public void onPageFinished(WebView view, String url) {
+        super.onPageFinished(view, url);
+        if (Objects.equals(url, "file:///android_asset/index.html")) {
+
+        } else {
+                indexActivity.updateStatusColor(view);
+        }
+        String is = indexActivity.getSharedPreferences("data", MODE_PRIVATE).getString("trace", "关闭");
+        if (if_load) {
+            if (url.startsWith("file://")) {
+            } else {
+                if (Objects.equals(is, "开启")) {
+                } else {
+                    if(Objects.equals(view.getTitle(), "") ||view.getTitle()==null)
+                    {
+                        indexActivity.add_history("网页无法打开",view.copyBackForwardList().getCurrentItem().getUrl(),null);
+                    }else
+                    {
+                        indexActivity.add_history(view.copyBackForwardList().getCurrentItem().getTitle(),view.copyBackForwardList().getCurrentItem().getUrl(),null);
+                    }
+                    if_load = false;
+                }
+            }
+        }
+
+        if (indexActivity.isTool) {
+            indexActivity.itemlistViewAll.get(IndexActivity.count).get(indexActivity.listview).post(new Runnable() {
+                @Override
+                public void run() {
+                    String tool = "javascript:(function () { var script = document.createElement('script'); script.src=\"//cdn.jsdelivr.net/npm/eruda\"; document.body.appendChild(script); script.onload = function () { eruda.init() } })();";
+                    if (IndexActivity.itempager[IndexActivity.countlist.get(IndexActivity.count)].getCurrentItem() > 0) {
+                        indexActivity.itemlistViewAll.get(IndexActivity.count).get(indexActivity.listview).evaluateJavascript(tool, null);
+                    }
+
+                }
+            });
+        }
+        count = 0;
+        CookieManager cookieManager = CookieManager.getInstance();
+        String CookieStr = cookieManager.getCookie(url);
+        IndexActivity.Cookie = CookieStr;
+        ArrayList<HashMap<String, Object>> lista = new ArrayList<HashMap<String, Object>>();
+        ArrayList<HashMap<String, Object>> listb = new ArrayList<HashMap<String, Object>>();
+        SQLiteOpenHelper dbHelper = new Database(indexActivity, "Database", null, 1);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Cursor cursor = db.query("Api", null, null, null, null, null, "id desc");
+        if (cursor != null && cursor.getCount() > 0) {
+            boolean if_exsit = true;
+            while (cursor.moveToNext()) {
+                String get_title = cursor.getString(1);
+                String get_content = cursor.getString(2);
+                String get_label = cursor.getString(3);
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("title", get_title);
+                map.put("content", get_content);
+                map.put("label", get_label);
+                lista.add(map);
+            }
+
+        }
+        Cursor cursorr = db.query("Collect", null, null, null, null, null, "id desc");
+        if (cursorr != null && cursorr.getCount() > 0) {
+            boolean if_exsit = true;
+            while (cursorr.moveToNext()) {
+                String get_title = cursorr.getString(1);
+                String get_content = cursorr.getString(2);
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("title", get_title);
+                map.put("content", get_content);
+                listb.add(map);
+            }
+        }
+
+        indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).post(new Runnable() {
+            @Override
+            public void run() {
+                JSONArray datab = new JSONArray(listb);
+                String List = "javascript:CollectList('" + datab + "')";
+                indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).evaluateJavascript(List, null);
+            }
+        });
+        indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).post(new Runnable() {
+            @Override
+            public void run() {
+                JSONArray dataa = new JSONArray(lista);
+                String renderList = "javascript:renderList('" + dataa + "')";
+                indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).evaluateJavascript(renderList, null);
+
+            }
+        });
+        /*
+        String indexBackground = indexActivity.getSharedPreferences("data", MODE_PRIVATE).getString("indexBackground", "空白背景");
+        if(Objects.equals(indexBackground, "空白背景")&&indexActivity.listview==0)
+        {
+
+        }else
+        {
+        indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(0).post(new Runnable() {
+            @Override
+            public void run() {
+                indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(0).evaluateJavascript("(function () { class ChangeBackground { constructor() { this.init(); }; init() { this.addStyle(`html, body {}*{color: #ffffff !important;box-shadow: none !important;}*:after, *:before {box-shadow: none !important;background-color: transparent !important;}a, a > *{color: #ffffff !important;}[data-change-border-color][data-change-border-color-important] {}[data-change-background-color][data-change-background-color-important] {}`); this.selectAllNodes(node => { if (node.nodeType !== 1) { return; }; const style = window.getComputedStyle(node, null); const whiteList = ['rgba(0, 0, 0, 0)', 'transparent']; const backgroundColor = style.getPropertyValue('background-color'); const borderColor = style.getPropertyValue('border-color'); if (whiteList.indexOf(backgroundColor) < 0) { if (this.isWhiteToBlack(backgroundColor)) { node.dataset.changeBackgroundColor = ''; node.dataset.changeBackgroundColorImportant = ''; } else { delete node.dataset.changeBackgroundColor; delete node.dataset.changeBackgroundColorImportant; }; }; if (whiteList.indexOf(borderColor) < 0) { if (this.isWhiteToBlack(borderColor)) { node.dataset.changeBorderColor = ''; node.dataset.changeBorderColorImportant = ''; } else { delete node.dataset.changeBorderColor; delete node.dataset.changeBorderColorImportant; }; }; if (borderColor.indexOf('rgb(255, 255, 255)') >= 0) { delete node.dataset.changeBorderColor; delete node.dataset.changeBorderColorImportant; node.style.borderColor = 'transparent'; }; }); }; addStyle(style = '') { const styleElm = document.createElement('style'); styleElm.innerHTML = style; document.head.appendChild(styleElm); }; isWhiteToBlack(colorStr = '') { let hasWhiteToBlack = false; const colorArr = colorStr.match(/rgb.+?\\)/g); if (!colorArr || colorArr.length === 0) { return true; }; colorArr.forEach(color => { const reg = /rgb[a]*?\\(([0-9]+),.*?([0-9]+),.*?([0-9]+).*?\\)/g; const result = reg.exec(color); const red = result[1]; const green = result[2]; const blue = result[3]; const deviation = 20; const max = Math.max(red, green, blue); const min = Math.min(red, green, blue); if (max - min <= deviation) { hasWhiteToBlack = true; }; }); return hasWhiteToBlack; }; selectAllNodes(callback = () => { }) { const allNodes = document.querySelectorAll('*'); Array.from(allNodes, node => { callback(node); }); this.observe({ targetNode: document.documentElement, config: { attributes: false }, callback(mutations, observer) { const allNodes = document.querySelectorAll('*'); Array.from(allNodes, node => { callback(node); }); } }); }; observe({ targetNode, config = {}, callback = () => { } }) { if (!targetNode) { return; }; config = Object.assign({ attributes: true, childList: true, subtree: true }, config); const observer = new MutationObserver(callback); observer.observe(targetNode, config); }; }; new ChangeBackground(); })();\n", null);
+
+            }
+        });
+        }
+
+         */
+        SharedPreferences sharedPreferences = indexActivity.getSharedPreferences("DIY", MODE_PRIVATE);
+        int i = sharedPreferences.getInt("title", 0);
+        String content = sharedPreferences.getString("content", "无");
+        if (i == 1) {
+            indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).post(new Runnable() {
+                @Override
+                public void run() {
+                    String renderList = "javascript:setTop('Logo','" + content + "')";
+                    indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).evaluateJavascript(renderList, null);
+
+                }
+            });
+        } else if (i == 2) {
+            indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).post(new Runnable() {
+                @Override
+                public void run() {
+                    String renderList = "javascript:setTop('自定义Css','" + content + "')";
+                    indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).evaluateJavascript(renderList, null);
+
+                }
+            });
+        } else if (i == 3) {
+            indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).post(new Runnable() {
+                @Override
+                public void run() {
+                    String renderList = "javascript:setTop('文字','" + content + "')";
+                    indexActivity.itemlistViewAll.get(IndexActivity.countlist.get(IndexActivity.count)).get(indexActivity.listview).evaluateJavascript(renderList, null);
+
+                }
+            });
+        } else {
+
+        }
+
     }
 
+    @Override
+    public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+        view.loadUrl("file:///android_asset/error.html");
+        view.post(new Runnable() {
+            @Override
+            public void run() {
+                String renderList = "javascript:document.getElementById(\"content\").innerHTML=\"" +description +"\"";
+                view.evaluateJavascript(renderList, null);
+            }
+        });
+    }
 }
 
 class ScriptBrowserDownloadListener implements DownloadListener {
     private final IndexActivity indexActivity;
-
     public ScriptBrowserDownloadListener(IndexActivity indexActivity) {
         this.indexActivity = indexActivity;
     }

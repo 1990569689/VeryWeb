@@ -20,7 +20,7 @@
 <script>
         const listArea = document.getElementById('list')
         // 列表容器
-        const data = "[{\"title\": \"设置背景壁纸\"},{\"title\": \"设置顶部Log\"},{\"title\": \"设置顶部文字\"},{\"title\": \"自定义顶部Css\"}]"
+        const data = "[{\"title\": \"设置背景壁纸\"},{\"title\": \"设置顶部Log\"},{\"title\": \"设置顶部文字\"},{\"title\": \"自定义顶部Css\"},{\"title\": \"恢复默认空白背景\"}]"
         json = JSON.parse(data)
         let listData = json
         // 列表
@@ -39,9 +39,9 @@
                     listArea.appendChild(LI)
                     LI.onclick = function() {
                         window.androidObject.call_person(item.title)
-                         }
+                   }
                 })
-                return
+               return
             }
         }
     </script>

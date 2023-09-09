@@ -33,6 +33,7 @@
                 android:layout_weight="1"
                 android:id="@+id/menu_1"
                 android:gravity="center_vertical"
+                android:textColor="@color/black"
                 android:text="添加在线主页"/>
                 <TextView
                     android:layout_width="50dp"
@@ -54,6 +55,7 @@
                 android:textSize="12sp"
                 android:gravity="center_vertical"
                 android:id="@+id/menu_2"
+                android:textColor="@color/black"
                 android:text="DIY本地主页"/>
                 <TextView
                     android:layout_width="50dp"
