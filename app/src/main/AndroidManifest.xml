@@ -120,7 +120,7 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-
+        <service android:name=".DaemonService" android:process=":daemon" />
     </application>
 
 </manifest>

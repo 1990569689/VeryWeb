@@ -255,6 +255,10 @@ public class IndexActivity extends FragmentActivity {
     private List<DownloadInfo> downloadss;
     static SimpleAdapter mySimpleAdapter, mSimpleAdapter;
     static final ArrayList<HashMap<String, Object>> listItem = new ArrayList<HashMap<String, Object>>();/*在数组中存放数据*/
+    private void startDaemonProcess() {
+        Intent intent = new Intent(this, DaemonService.class);
+        startService(intent);
+    }
 
     private final DownloadJobListener jobListener = new DownloadJobListener() {
         @Override
@@ -750,19 +754,7 @@ public class IndexActivity extends FragmentActivity {
                                 itemLongClickedPopWindow.dismiss();
                             }
                         });
-                        itemLongClickedPopWindow.getView(R.id.table_in).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                table_text.setText(String.valueOf(final_count + 1));
-                                adapter.notifyItemInserted(list.size());
-                                listviewAll.add(listview);
-                                listview = 0;
-                                isWindow = true;
-                                touch=false;
-                                addView(ListViews, herf, 2, null);
-                                itemLongClickedPopWindow.dismiss();
-                            }
-                        });
+
                         break;
                     case WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE: // 带有链接的图片类型
                     case WebView.HitTestResult.IMAGE_TYPE: // 处理长按图片的菜单项
@@ -782,19 +774,7 @@ public class IndexActivity extends FragmentActivity {
                                 itemLongClickedPopWindow.dismiss();
                             }
                         });
-                        itemLongClickedPopWindow.getView(R.id.table_in).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                table_text.setText(String.valueOf(final_count + 1));
-                                adapter.notifyItemInserted(list.size());
-                                listviewAll.add(listview);
-                                listview = 0;
-                                isWindow = true;
-                                touch=false;
-                                addView(ListViews, url, 2, null);
-                                itemLongClickedPopWindow.dismiss();
-                            }
-                        });
+
                         itemLongClickedPopWindow.getView(R.id.item_longclicked_viewImage).setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -884,7 +864,7 @@ public class IndexActivity extends FragmentActivity {
                 TextView data_title = view.findViewById(R.id.data_title);
                 data_title.setText("消息");
                 TextView data_content = view.findViewById(R.id.data_content);
-                data_content.setText("来自:" + url + "的消息\n" + "网站请求获取地理位置");
+                data_content.setText("来自当前网页的消息：\n" + "网站请求获取地理位置");
                 TextView data_sure = view.findViewById(R.id.data_sure);
                 TextView data_cancel = view.findViewById(R.id.data_cancel);
                 data_sure.setOnClickListener(new View.OnClickListener() {
@@ -930,7 +910,7 @@ public class IndexActivity extends FragmentActivity {
                 TextView data_title = view.findViewById(R.id.data_title);
                 data_title.setText("消息");
                 TextView data_content = view.findViewById(R.id.data_content);
-                data_content.setText("来自:" + url + "的消息\n" + message);
+                data_content.setText("来自当前网页的消息：\n"  + message);
                 TextView data_sure = view.findViewById(R.id.data_sure);
                 TextView data_cancel = view.findViewById(R.id.data_cancel);
 
@@ -969,7 +949,7 @@ public class IndexActivity extends FragmentActivity {
                 dialog.getWindow().setContentView(view);
                 TextView data_title = view.findViewById(R.id.data_title);
                 TextView data_content = view.findViewById(R.id.data_content);
-                data_content.setText("来自:" + url + "的消息\n" + message);
+                data_content.setText("来自当前网页的消息：\n"  + message);
                 TextView data_sure = view.findViewById(R.id.data_sure);
                 TextView data_cancel = view.findViewById(R.id.data_cancel);
                 data_sure.setOnClickListener(new View.OnClickListener() {
@@ -1009,7 +989,7 @@ public class IndexActivity extends FragmentActivity {
                 TextView data_title = view.findViewById(R.id.data_title);
                 data_title.setText("页面即将跳转");
                 TextView data_content = view.findViewById(R.id.data_content);
-                data_content.setText("来自:" + url + "的消息\n" + message);
+                data_content.setText("来自当前网页的消息：\n" + message);
                 TextView data_sure = view.findViewById(R.id.data_sure);
                 TextView data_cancel = view.findViewById(R.id.data_cancel);
                 data_sure.setOnClickListener(new View.OnClickListener() {
@@ -1028,7 +1008,6 @@ public class IndexActivity extends FragmentActivity {
                 });
                 return true;
             }
-
             @Override
             public boolean onJsPrompt(WebView webView, String url, String message, String defaultValue, JsPromptResult result) {
                 final EditText input = new EditText(IndexActivity.this);
@@ -3187,7 +3166,8 @@ public class IndexActivity extends FragmentActivity {
         log_view=findViewById(R.id.log_view);
         mSimpleAdapter = new SimpleAdapter(IndexActivity.this, listItem, R.layout.collect_item, new String[]{"title", "content"}, new int[]{R.id.list_title, R.id.list_url});
         mySimpleAdapter = new SimpleAdapter(IndexActivity.this, resources, R.layout.collect_item, new String[]{"type", "url"}, new int[]{R.id.list_title, R.id.list_url});
-
+        startService(new Intent(this,MyService.class));
+        startDaemonProcess();
 
 
         view_video=(LinearLayout)findViewById(R.id.view_video);
@@ -4412,13 +4392,27 @@ public class IndexActivity extends FragmentActivity {
         goBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                goBack();
+                if(table.getVisibility()==View.VISIBLE||full.getVisibility()==View.VISIBLE)
+                {
+                    full.setVisibility(View.GONE);
+                    table.setVisibility(View.GONE);
+                }else
+                {
+                    goBack();
+                }
+
             }
         });
         goForward.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                goForward();
+                if(table.getVisibility()==View.VISIBLE||full.getVisibility()==View.VISIBLE)
+                {
+                    full.setVisibility(View.GONE);
+                    table.setVisibility(View.GONE);
+                }else {
+                    goForward();
+                }
             }
         });
         if (Build.VERSION.SDK_INT >= 21) {
@@ -4476,18 +4470,30 @@ public class IndexActivity extends FragmentActivity {
         Home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listview = 0;
-                itempager[countlist.get(count)].setCurrentItem(0, false);
-                webtitle.setText(WebPageTitleAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()));
-                itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).onResume();
-                viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
-                ps.setWebProgress(100);
+                if(table.getVisibility()==View.VISIBLE||full.getVisibility()==View.VISIBLE)
+                {
+                    full.setVisibility(View.GONE);
+                    table.setVisibility(View.GONE);
+                }else {
+                    listview = 0;
+                    itempager[countlist.get(count)].setCurrentItem(0, false);
+                    webtitle.setText(WebPageTitleAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()));
+                    itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).onResume();
+                    viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
+                    ps.setWebProgress(100);
+                }
             }
         });
         More.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Dialog();
+                if(table.getVisibility()==View.VISIBLE||full.getVisibility()==View.VISIBLE)
+                {
+                    full.setVisibility(View.GONE);
+                    table.setVisibility(View.GONE);
+                }else {
+                    Dialog();
+                }
             }
         });
         webtitle.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -4595,7 +4601,6 @@ public class IndexActivity extends FragmentActivity {
                             String indexBackground = getSharedPreferences("data", MODE_PRIVATE).getString("indexBackground", "空白背景");
                             if(Objects.equals(indexBackground, "空白背景"))
                             {
-
                             }else
                             {
                                 search.setColorFilter(getResources().getColor(R.color.white));
@@ -4603,7 +4608,6 @@ public class IndexActivity extends FragmentActivity {
                                 api.setColorFilter(getResources().getColor(R.color.white));
                                 webtitle.setTextColor(getResources().getColor(R.color.white));
                             }
-
                             View v = getCurrentFocus();
                             closeKeyboard(v);
                             isOn = false;
@@ -4623,7 +4627,7 @@ public class IndexActivity extends FragmentActivity {
                                     Cursor cursorr = db.rawQuery("SELECT content FROM Engines WHERE title='" + Engines + "'", null);
                                     if (cursorr.getCount() > 0) {
                                         while (cursorr.moveToNext()) {
-                                            String Engines = cursorr.getString(cursorr.getColumnIndex("content"));
+                                            @SuppressLint("Range") String Engines = cursorr.getString(cursorr.getColumnIndex("content"));
                                             destory();
                                             viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
                                             addWebView(Engines + webtitle.getText().toString());
@@ -5603,7 +5607,6 @@ public class IndexActivity extends FragmentActivity {
         });
         return "我是js调用安卓获取的数据";
     }
-
     @JavascriptInterface
     public String call_copy(String text, String title) {
         ToastUtil.Toast(IndexActivity.this, "" + text + title);
@@ -5616,7 +5619,6 @@ public class IndexActivity extends FragmentActivity {
 
     private void goBack() {
         if (itemlistViewAll.get(countlist.get(count)).size() > 1 && itempager[countlist.get(count)].getCurrentItem() != 0) {
-
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -5632,16 +5634,13 @@ public class IndexActivity extends FragmentActivity {
                     {
                         itempager[countlist.get(count)].setCurrentItem(itempager[countlist.get(count)].getCurrentItem() - 1, true);
                     }
-
                    // ps.setWebProgress(100);
                     try{
                         updateStatusColor(itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()));
                     }catch (Exception e)
                     {
-                        Log.w("Error updating","error:"+e);
                     }
                     webtitle.setText(WebPageTitleAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()));
-
             if (itempager[countlist.get(count)].getCurrentItem() > 0) {
                 itemlistViewAll.get(countlist.get(count)).get(itempager[countlist.get(count)].getCurrentItem()).onResume();
                 listview = listview - 1;
@@ -5651,8 +5650,7 @@ public class IndexActivity extends FragmentActivity {
                 viewPagerAdapter[countlist.get(count)].notifyDataSetChanged();
                 ps.setWebProgress(100);
                 Util.clearWebViewCache(IndexActivity.this);
-            }
-                }});
+            }}});
         } else if (viewpager.getCurrentItem() > 0) {
             listviewAll.add(listview);
             int position = viewpager.getCurrentItem();
@@ -5724,9 +5722,8 @@ public class IndexActivity extends FragmentActivity {
                 updateStatusColor(itemlistViewAll.get(countlist.get(count)).get(listview));
             }catch (Exception e)
             {
-                Log.w("Error updating","error:"+e);
-            }
 
+            }
             webtitle.setText(title);
         }
     }
@@ -7029,85 +7026,91 @@ class ScriptBrowserWebViewClientGm extends WebViewClientGm {
             }
             return false;
         } else {
-            if (Objects.equals(indexActivity.Webapk, "询问")) {
-                indexActivity.toast_view.setVisibility(View.VISIBLE);
-                indexActivity.toast_content.setText("网站请求打开其他应用？");
-                indexActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        indexActivity.toast_sure.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
+            if (Objects.equals(view.getUrl(), "file:///android_asset/index.html")) {
+            } else {
+                if (Objects.equals(indexActivity.Webapk, "询问")) {
+                    indexActivity.toast_view.setVisibility(View.VISIBLE);
+                    indexActivity.toast_content.setText("网站请求打开其他应用？");
+                    indexActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            indexActivity.toast_sure.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    try {
+                                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(request.getUrl().toString()));
+                                        intent.addCategory("android.intent.category.BROWSABLE");
+                                        intent.setComponent(null);
+                                        indexActivity.startActivity(intent);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        ToastUtil.Toast(indexActivity, "未安装");
+                                        indexActivity.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                indexActivity.toast_view.setVisibility(View.GONE);
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    indexActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            indexActivity.toast_cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    indexActivity.toast_view.setVisibility(View.GONE);
+                                }
+                            });
+                        }
+                    });
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            long startTime = System.currentTimeMillis();
+                            while (System.currentTimeMillis() - startTime < 3000) {
                                 try {
-                                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(request.getUrl().toString()));
-                                    intent.addCategory("android.intent.category.BROWSABLE");
-                                    intent.setComponent(null);
-                                    indexActivity.startActivity(intent);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    ToastUtil.Toast(indexActivity, "未安装");
-                                    indexActivity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            indexActivity.toast_view.setVisibility(View.GONE);
-                                        }
-                                    });
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    indexActivity.toast_view.setVisibility(View.GONE);
                                 }
                             }
-                        });
-                    }
-                });
-                indexActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        indexActivity.toast_cancel.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                indexActivity.toast_view.setVisibility(View.GONE);
-                            }
-                        });
-                    }
-                });
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        long startTime = System.currentTimeMillis();
-                        while (System.currentTimeMillis() - startTime < 3000) {
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                indexActivity.toast_view.setVisibility(View.GONE);
-                            }
+                            indexActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    indexActivity.toast_view.setVisibility(View.GONE);
+                                }
+                            });
+
                         }
+                    }).start();
+                } else if (Objects.equals(indexActivity.Webapk, "允许")) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(request.getUrl().toString()));
+                        intent.addCategory("android.intent.category.BROWSABLE");
+                        intent.setComponent(null);
+                        indexActivity.startActivity(intent);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        ToastUtil.Toast(indexActivity, "未安装");
                         indexActivity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 indexActivity.toast_view.setVisibility(View.GONE);
                             }
                         });
-
                     }
-                }).start();
-            } else if (Objects.equals(indexActivity.Webapk, "允许")) {
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(request.getUrl().toString()));
-                    intent.addCategory("android.intent.category.BROWSABLE");
-                    intent.setComponent(null);
-                    indexActivity.startActivity(intent);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    ToastUtil.Toast(indexActivity, "未安装");
-                    indexActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            indexActivity.toast_view.setVisibility(View.GONE);
-                        }
-                    });
+                } else {
                 }
-            } else {
             }
-            return true;
-        }
+                return true;
+
+            }
+
+
     }
 
     @Override

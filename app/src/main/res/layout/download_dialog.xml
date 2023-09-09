@@ -21,6 +21,7 @@
          android:textColor="@color/black"
          android:textSize="14sp"
          android:layout_marginBottom="10dp"
+         android:textStyle="bold"
          android:text="你想下载这个文件吗？"
          />
         <EditText

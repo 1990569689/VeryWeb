@@ -54,14 +54,14 @@ public class Database extends SQLiteOpenHelper {
         String sql2="insert into UserAgent(title,content) values('手机微信','Mozilla/5.0 (Linux; Android 11; Redmi K40 Pro Build/QKQ1.190910.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/78.0.3904.62 XWEB/2757 MMWEBSDK/201101 Mobile Safari/537.36 MMWEBID/70 MicroMessenger/7.0.21.1800(0x2700153B) Process/toolsmp WeChat/arm64 Weixin NetType/4G Language/zh_CN ABI/arm64')";
         String sql3="insert into UserAgent(title,content) values('手机夸克','Mozilla/5.0 (Linux; Android 11; Redmi K40 Pro Build/QKQ1.190825.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/84.0.4147.105 Mobile Safari/537.36 SearchCraft/2.8.2 baiduboxapp/3.2.5.10')";
         String sql4="insert into UserAgent(title,content) values('Iphone','Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1 ')";
-        String sql5="insert into UserAgent(title,content) values('Windows','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')";
-        String sql6="insert into Engines(title,content) values('百度','http://m.baidu.com/s?from=1022282z&word=')";
+        String sql5="insert into UserAgent(title,content) values('电脑','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')";
+        String sql6="insert into Engines(title,content) values('百度','https://www.baidu.com/s?from=1022282z&word=')";
         String sql7="insert into Engines(title,content) values('Google','http://www.google.com/search?q=')";
         String sql8="insert into Engines(title,content) values('Bing','https://cn.bing.com/search?q=')";
         String result=FileUtil.getTxtFromAssets(mContext,"index.html");
         String toresult=Base64.encodeToString(result.getBytes(), Base64.DEFAULT);
         String sql9="insert into Homepage(title,content) values('本地主页：主页','"+toresult+"')";
-        String sql10="insert into Api(title,content,label) values('百度','http://m.baidu.com/s?from=1022282z&word=','搜索引擎')";
+        String sql10="insert into Api(title,content,label) values('百度','https://www.baidu.com/s?from=1022282z&word=','搜索引擎')";
         db.execSQL(sql1);
         db.execSQL(sql2);
         db.execSQL(sql3);

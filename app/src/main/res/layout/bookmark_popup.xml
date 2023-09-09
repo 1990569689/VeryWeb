@@ -29,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:gravity="center"
-        android:text="打开"
+        android:text="打开书签"
         android:textColor="@android:color/black"
         android:textSize="16sp" />
 
@@ -43,7 +43,7 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:gravity="center"
-        android:text="删除"
+        android:text="删除书签"
         android:textColor="@android:color/black"
         android:textSize="16sp" />
     <TextView
@@ -59,7 +59,7 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:gravity="center"
-        android:text="剪切"
+        android:text="移动书签"
         android:textColor="@android:color/black"
         android:textSize="16sp" />
     <TextView

@@ -23,6 +23,7 @@
             android:layout_height="match_parent"
             android:id="@+id/more_title"
             android:textSize="14sp"
+            android:textStyle="bold"
             android:layout_marginBottom="10dp"
             android:textColor="@color/black"
             android:text="添加"

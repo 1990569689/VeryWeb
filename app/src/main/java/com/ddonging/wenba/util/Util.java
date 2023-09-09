@@ -135,7 +135,7 @@ public class Util {
       Document document = Jsoup.parse(String.valueOf(content));
       Element element = document.select("body > dl").first();
       String bookmarkpath = context.getExternalFilesDir("bookmark").getAbsolutePath();
-      Bookmark.set(element, bookmarkpath, context);
+      try{   Bookmark.set(element, bookmarkpath, context);}catch(Exception e){}
       return null;
    }
 

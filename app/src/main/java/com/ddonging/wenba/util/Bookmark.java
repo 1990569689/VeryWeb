@@ -52,7 +52,6 @@ public class Bookmark {
 
     public static void createFile(String path, String content)
     {
-
         File mFile = new File(path);
         //判断文件是否存在，存在就删除
         if (mFile.exists()) {

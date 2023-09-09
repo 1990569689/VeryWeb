@@ -21,6 +21,8 @@
             android:layout_height="match_parent"
             android:id="@+id/data_title"
             android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold"
             android:text="信息"
             />
         <ScrollView

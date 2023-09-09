@@ -54,14 +54,7 @@
         android:text="复制链接"
         android:textColor="@android:color/black"
         android:textSize="16sp" />
-    <TextView
-        android:id="@+id/table_in"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:gravity="center"
-        android:text="后台打开"
-        android:textColor="@android:color/black"
-        android:textSize="16sp" />
+
     <TextView
         android:id="@+id/in_table"
         android:layout_width="match_parent"

@@ -25,6 +25,7 @@
                 android:textColor="@color/black"
                 android:textSize="14sp"
                 android:id="@+id/api_title"
+                android:textStyle="bold"
                 android:layout_marginBottom="10dp"
                 android:text="添加接口"/>
             <EditText
